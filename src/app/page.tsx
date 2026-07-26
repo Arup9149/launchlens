@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/landing/navbar"
+import { WaitlistForm } from "@/components/landing/waitlist-form"
 
 export default function Home() {
   return (
@@ -283,20 +284,21 @@ export default function Home() {
             Join the private beta. Get founding-member pricing and help shape the product.
           </p>
 
-          <form className="flex flex-col sm:flex-row gap-2.5">
-            <input
-              type="email"
-              required
-              placeholder="you@email.com"
-              className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-full px-5 py-3 text-[14px] text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500/40 transition"
-            />
-            <button
-              type="submit"
-              className="bg-gradient-to-r from-violet-500 to-violet-600 px-7 py-3 rounded-full text-[14px] font-medium text-white whitespace-nowrap hover:from-violet-400 hover:to-violet-500 transition"
-            >
-              Join waitlist
-            </button>
-          </form>
+          {/* ====================== WAITLIST ====================== */}
+<section id="waitlist" className="py-28">
+  <div className="max-w-xl mx-auto px-6 text-center">
+    <h2 className="text-3xl sm:text-4xl font-medium tracking-tight mb-4">
+      Stop guessing.
+    </h2>
+    <p className="text-[15px] text-zinc-400 mb-10 leading-relaxed">
+      Join the private beta. Get founding-member pricing and help shape the product.
+    </p>
+
+    <WaitlistForm />
+
+    <p className="text-[12px] text-zinc-600 mt-5">No spam. Ever.</p>
+  </div>
+</section>
           <p className="text-[12px] text-zinc-600 mt-5">No spam. Ever.</p>
         </div>
       </section>
