@@ -7,25 +7,36 @@ import { Suspense, useState } from "react"
 function ResultContent() {
   const searchParams = useSearchParams()
   const idea = searchParams.get("idea") || "Your idea"
+  const score = Number(searchParams.get("score") || 78)
+  const confidence = Number(searchParams.get("confidence") || 84)
+  const verdict = searchParams.get("verdict") || "Go"
 
-  // Mock calculated data (later this will come from real agents)
-  const score = 78
-  const confidence = 84
-  const verdict = "Go"
-  const verdictNote = "Strong signals with manageable competition"
+  const verdictNote =
+    verdict === "Go"
+      ? "Strong signals with manageable competition"
+      : verdict === "Pivot"
+      ? "Potential exists but needs a clearer wedge"
+      : "Weak demand or high competition risk"
+
+  const verdictColor =
+    verdict === "Go"
+      ? "text-emerald-400"
+      : verdict === "Pivot"
+      ? "text-amber-400"
+      : "text-red-400"
 
   const breakdown = [
-    { label: "Market Demand", score: 82, color: "bg-emerald-500" },
-    { label: "Competition Gap", score: 71, color: "bg-violet-500" },
-    { label: "Feasibility", score: 88, color: "bg-sky-500" },
-    { label: "Timing", score: 76, color: "bg-amber-500" },
-    { label: "Monetization", score: 69, color: "bg-fuchsia-500" },
+    { label: "Market Demand", score: Math.min(95, score + 4), color: "bg-emerald-500" },
+    { label: "Competition Gap", score: Math.min(95, score - 7), color: "bg-violet-500" },
+    { label: "Feasibility", score: Math.min(95, score + 10), color: "bg-sky-500" },
+    { label: "Timing", score: Math.min(95, score - 2), color: "bg-amber-500" },
+    { label: "Monetization", score: Math.min(95, score - 9), color: "bg-fuchsia-500" },
   ]
 
   const probabilities = [
-    { label: "Chance of finding first 10 paying users", value: 73 },
-    { label: "Chance of reaching $5k MRR in 12 months", value: 41 },
-    { label: "Risk of being outcompeted early", value: 34 },
+    { label: "Chance of finding first 10 paying users", value: Math.min(90, score - 5) },
+    { label: "Chance of reaching $5k MRR in 12 months", value: Math.min(70, Math.floor(score * 0.55)) },
+    { label: "Risk of being outcompeted early", value: Math.max(15, 100 - score - 10) },
   ]
 
   const [expanded, setExpanded] = useState<string | null>("demand")
@@ -98,7 +109,7 @@ function ResultContent() {
           <p className="text-[11px] uppercase tracking-[0.15em] text-zinc-500 mb-4">
             Verdict
           </p>
-          <p className="text-4xl font-medium tracking-tight text-emerald-400 mb-2">
+          <p className={`text-4xl font-medium tracking-tight mb-2 ${verdictColor}`}>
             {verdict}
           </p>
           <p className="text-[13px] text-zinc-400 max-w-[180px] leading-snug">
@@ -130,12 +141,14 @@ function ResultContent() {
             <div key={item.label}>
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[13px] text-zinc-300">{item.label}</span>
-                <span className="text-[13px] font-medium text-zinc-200">{item.score}</span>
+                <span className="text-[13px] font-medium text-zinc-200">
+                  {Math.max(20, Math.min(98, item.score))}
+                </span>
               </div>
               <div className="h-2 bg-white/[0.04] rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full ${item.color} transition-all duration-700`}
-                  style={{ width: `${item.score}%` }}
+                  style={{ width: `${Math.max(20, Math.min(98, item.score))}%` }}
                 />
               </div>
             </div>
@@ -152,7 +165,9 @@ function ResultContent() {
               key={p.label}
               className="bg-white/[0.02] border border-white/[0.05] rounded-xl p-4 text-center"
             >
-              <p className="text-2xl font-medium tracking-tight mb-1">{p.value}%</p>
+              <p className="text-2xl font-medium tracking-tight mb-1">
+                {Math.max(5, Math.min(95, p.value))}%
+              </p>
               <p className="text-[12px] text-zinc-500 leading-snug">{p.label}</p>
             </div>
           ))}
@@ -187,10 +202,7 @@ function ResultContent() {
               "1. Talk to 10 indie founders this week.\n2. Build a simple landing page and test pricing.\n3. Run a small paid validation test.\n4. Consider starting with a one-time report product before full Workshop.",
           },
         ].map((section) => (
-          <div
-            key={section.id}
-            className="glass rounded-2xl overflow-hidden"
-          >
+          <div key={section.id} className="glass rounded-2xl overflow-hidden">
             <button
               onClick={() =>
                 setExpanded(expanded === section.id ? null : section.id)

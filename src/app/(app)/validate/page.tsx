@@ -14,12 +14,31 @@ export default function ValidatePage() {
 
     setLoading(true)
 
-    // Simulate research time
-    await new Promise((resolve) => setTimeout(resolve, 2200))
+    // Simple mock scoring (later replaced by real agents)
+    const length = idea.trim().length
+    const score = Math.min(92, Math.max(48, Math.floor(55 + length / 12 + Math.random() * 15)))
+    const confidence = Math.min(95, Math.max(60, score - 5 + Math.floor(Math.random() * 12)))
+    const verdict = score >= 75 ? "Go" : score >= 55 ? "Pivot" : "Kill"
 
-    // For now we pass the idea via query (later we’ll save to DB)
-    const encoded = encodeURIComponent(idea.trim())
-    router.push(`/validate/result?idea=${encoded}`)
+    try {
+      // Save to Supabase
+      await fetch("/api/validations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idea: idea.trim(), score, verdict, confidence }),
+      })
+    } catch (err) {
+      console.error(err)
+    }
+
+    // Go to result page
+    const params = new URLSearchParams({
+      idea: idea.trim(),
+      score: String(score),
+      verdict,
+      confidence: String(confidence),
+    })
+    router.push(`/validate/result?${params.toString()}`)
   }
 
   return (

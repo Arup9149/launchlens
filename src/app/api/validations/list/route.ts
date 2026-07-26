@@ -1,30 +1,24 @@
 import { createClient } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
 
-export async function POST(request: Request) {
+export async function GET() {
   try {
-    const body = await request.json()
-    const { idea, score, verdict, confidence } = body
-
-    if (!idea) {
-      return NextResponse.json({ error: "Idea is required" }, { status: 400 })
-    }
-
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
-    const { error } = await supabase.from("validations").insert([
-      { idea, score, verdict, confidence },
-    ])
+    const { data, error } = await supabase
+      .from("validations")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(20)
 
     if (error) {
-      console.error(error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ data })
   } catch (err) {
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 })
   }
