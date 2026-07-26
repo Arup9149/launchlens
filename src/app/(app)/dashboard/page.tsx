@@ -52,8 +52,16 @@ export default function DashboardPage() {
       ) : validations.length === 0 ? (
         <div className="glass rounded-2xl p-12 text-center">
           <div className="w-12 h-12 rounded-full bg-violet-500/10 flex items-center justify-center mx-auto mb-6">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-violet-400">
-              <path d="M12 5v14M5 12h14" strokeLinecap="round"/>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              className="text-violet-400"
+            >
+              <path d="M12 5v14M5 12h14" strokeLinecap="round" />
             </svg>
           </div>
           <h2 className="text-xl font-medium mb-2">No ideas yet</h2>
@@ -69,38 +77,52 @@ export default function DashboardPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {validations.map((v) => (
-            <div
-              key={v.id}
-              className="glass rounded-2xl p-5 flex items-center justify-between gap-4 hover:bg-white/[0.03] transition"
-            >
-              <div className="flex-1 min-w-0">
-                <p className="text-[14px] text-zinc-200 truncate mb-1">
-                  {v.idea}
-                </p>
-                <p className="text-[12px] text-zinc-500">
-                  {new Date(v.created_at).toLocaleDateString("en-IN", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </p>
-              </div>
+          {validations.map((v) => {
+            const params = new URLSearchParams({
+              idea: v.idea,
+              score: String(v.score),
+              verdict: v.verdict,
+              confidence: String(v.confidence || 80),
+            })
 
-              <div className="flex items-center gap-6 shrink-0">
-                <div className="text-center">
-                  <p className="text-[11px] text-zinc-500 mb-0.5">Score</p>
-                  <p className="text-[15px] font-medium">{v.score}</p>
-                </div>
-                <div className="text-center min-w-[60px]">
-                  <p className="text-[11px] text-zinc-500 mb-0.5">Verdict</p>
-                  <p className={`text-[15px] font-medium ${getVerdictColor(v.verdict)}`}>
-                    {v.verdict}
+            return (
+              <Link
+                key={v.id}
+                href={`/validate/result?${params.toString()}`}
+                className="glass rounded-2xl p-5 flex items-center justify-between gap-4 hover:bg-white/[0.03] transition block"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-[14px] text-zinc-200 truncate mb-1">
+                    {v.idea}
+                  </p>
+                  <p className="text-[12px] text-zinc-500">
+                    {new Date(v.created_at).toLocaleDateString("en-IN", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
                   </p>
                 </div>
-              </div>
-            </div>
-          ))}
+
+                <div className="flex items-center gap-6 shrink-0">
+                  <div className="text-center">
+                    <p className="text-[11px] text-zinc-500 mb-0.5">Score</p>
+                    <p className="text-[15px] font-medium">{v.score}</p>
+                  </div>
+                  <div className="text-center min-w-[60px]">
+                    <p className="text-[11px] text-zinc-500 mb-0.5">Verdict</p>
+                    <p
+                      className={`text-[15px] font-medium ${getVerdictColor(
+                        v.verdict
+                      )}`}
+                    >
+                      {v.verdict}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            )
+          })}
         </div>
       )}
     </div>

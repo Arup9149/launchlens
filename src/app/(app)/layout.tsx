@@ -22,10 +22,17 @@ export default async function AppLayout({
           </Link>
 
           <div className="flex items-center gap-6">
-            <nav className="hidden sm:flex items-center gap-6 text-[13px] text-zinc-400">
-              <Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link>
-              <Link href="/validate" className="hover:text-white transition-colors">Validate</Link>
-            </nav>
+           <nav className="hidden sm:flex items-center gap-6 text-[13px] text-zinc-400">
+  <Link href="/dashboard" className="hover:text-white transition-colors">
+    Dashboard
+  </Link>
+  <Link href="/validate" className="hover:text-white transition-colors">
+    Validate
+  </Link>
+  <Link href="/workshop" className="hover:text-white transition-colors">
+    Workshop
+  </Link>
+</nav>
           </div>
         </div>
       </header>

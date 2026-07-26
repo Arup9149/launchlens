@@ -3,10 +3,30 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 
+declare global {
+  interface Window {
+    Razorpay: any
+  }
+}
+
 export default function ValidatePage() {
   const [idea, setIdea] = useState("")
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) {
+        resolve(true)
+        return
+      }
+      const script = document.createElement("script")
+      script.src = "https://checkout.razorpay.com/v1/checkout.js"
+      script.onload = () => resolve(true)
+      script.onerror = () => resolve(false)
+      document.body.appendChild(script)
+    })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -14,31 +34,80 @@ export default function ValidatePage() {
 
     setLoading(true)
 
-    // Simple mock scoring (later replaced by real agents)
+    // Mock scoring
     const length = idea.trim().length
     const score = Math.min(92, Math.max(48, Math.floor(55 + length / 12 + Math.random() * 15)))
     const confidence = Math.min(95, Math.max(60, score - 5 + Math.floor(Math.random() * 12)))
     const verdict = score >= 75 ? "Go" : score >= 55 ? "Pivot" : "Kill"
 
     try {
-      // Save to Supabase
+      // Save to database first
       await fetch("/api/validations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idea: idea.trim(), score, verdict, confidence }),
       })
+
+      // Create Razorpay order
+      const orderRes = await fetch("/api/razorpay/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idea: idea.trim(), score, verdict, confidence }),
+      })
+
+      const orderData = await orderRes.json()
+
+      if (!orderData.orderId) {
+        throw new Error(orderData.error || "Failed to create order")
+      }
+
+      // Load Razorpay
+      const scriptLoaded = await loadRazorpayScript()
+      if (!scriptLoaded) {
+        alert("Failed to load payment gateway")
+        setLoading(false)
+        return
+      }
+
+      const options = {
+        key: orderData.key,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "LaunchLens",
+        description: "Full Validation Report",
+        order_id: orderData.orderId,
+        handler: function (response: any) {
+          // Payment successful → go to result
+          const params = new URLSearchParams({
+            idea: idea.trim(),
+            score: String(score),
+            verdict,
+            confidence: String(confidence),
+            paid: "1",
+          })
+          router.push(`/validate/result?${params.toString()}`)
+        },
+        prefill: {
+          name: "",
+          email: "",
+        },
+        theme: {
+          color: "#7c3aed",
+        },
+        modal: {
+          ondismiss: function () {
+            setLoading(false)
+          },
+        },
+      }
+
+      const rzp = new window.Razorpay(options)
+      rzp.open()
     } catch (err) {
       console.error(err)
+      alert("Something went wrong. Please try again.")
+      setLoading(false)
     }
-
-    // Go to result page
-    const params = new URLSearchParams({
-      idea: idea.trim(),
-      score: String(score),
-      verdict,
-      confidence: String(confidence),
-    })
-    router.push(`/validate/result?${params.toString()}`)
   }
 
   return (
@@ -69,7 +138,7 @@ export default function ValidatePage() {
 
         <div className="flex items-center justify-between gap-4">
           <p className="text-[13px] text-zinc-600">
-            Tip: Mention the problem, who it’s for, and what makes it different.
+            ₹5,999 · Full evidence report
           </p>
           <button
             type="submit"
@@ -79,10 +148,10 @@ export default function ValidatePage() {
             {loading ? (
               <span className="flex items-center gap-2">
                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Researching...
+                Processing...
               </span>
             ) : (
-              "Validate idea"
+              "Validate idea · ₹5,999"
             )}
           </button>
         </div>
