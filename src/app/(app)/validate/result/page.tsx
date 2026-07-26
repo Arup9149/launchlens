@@ -199,7 +199,8 @@ function ResultContent() {
             id: "next",
             title: "Recommended Next Steps",
             content:
-              "1. Talk to 10 indie founders this week.\n2. Build a simple landing page and test pricing.\n3. Run a small paid validation test.\n4. Consider starting with a one-time report product before full Workshop.",
+              content:
+  "1. Open the Workshop and polish the problem + ICP.\n2. Use the Related Idea Generator to explore broader opportunities.\n3. Generate an MVP architecture blueprint.\n4. Talk to 5–10 potential users with the refined version.\n5. Only then start building.",
           },
         ].map((section) => (
           <div key={section.id} className="glass rounded-2xl overflow-hidden">
@@ -225,23 +226,47 @@ function ResultContent() {
         ))}
       </div>
 
-      {/* Actions */}
-      <div className="flex flex-wrap gap-3">
-        <Link
-          href="/validate"
-          className="text-[14px] font-medium px-6 py-2.5 rounded-full border border-white/10 text-zinc-300 hover:bg-white/5 transition"
-        >
-          Validate another
-        </Link>
-        <Link
-          href="/dashboard"
-          className="text-[14px] font-medium px-6 py-2.5 rounded-full bg-violet-600 hover:bg-violet-500 text-white transition"
-        >
-          Back to Dashboard
-        </Link>
+     {/* Actions + Upsell */}
+<div className="space-y-6">
+  {/* Workshop upsell */}
+  <div className="glass-strong rounded-2xl p-6 border border-violet-500/20">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <p className="text-[12px] uppercase tracking-[0.15em] text-violet-400 mb-1">
+          Next Level
+        </p>
+        <h3 className="text-[16px] font-medium mb-1">
+          Take this idea into the Workshop
+        </h3>
+        <p className="text-[13px] text-zinc-400 max-w-md">
+          Polish the idea, improve the score, generate related opportunities, and design the MVP architecture.
+        </p>
       </div>
+      <Link
+        href="/workshop"
+        className="shrink-0 bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-400 hover:to-violet-500 text-[13px] font-medium px-6 py-2.5 rounded-full text-white transition"
+      >
+        Open Workshop →
+      </Link>
     </div>
-  )
+  </div>
+
+  {/* Normal actions */}
+  <div className="flex flex-wrap gap-3">
+    <Link
+      href="/validate"
+      className="text-[14px] font-medium px-6 py-2.5 rounded-full border border-white/10 text-zinc-300 hover:bg-white/5 transition"
+    >
+      Validate another
+    </Link>
+    <Link
+      href="/dashboard"
+      className="text-[14px] font-medium px-6 py-2.5 rounded-full bg-white/5 hover:bg-white/10 text-white transition"
+    >
+      Back to Dashboard
+    </Link>
+  </div>
+</div>
 }
 
 export default function ResultPage() {
