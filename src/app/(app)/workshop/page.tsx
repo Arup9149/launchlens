@@ -19,49 +19,64 @@ export default function WorkshopPage() {
 
       {/* Feature grid */}
       <div className="grid sm:grid-cols-2 gap-4 mb-12">
-        {/* Clickable - Idea Polishing */}
+        {/* 1. Idea Polishing Garage */}
         <Link
           href="/workshop/polish"
           className="glass rounded-2xl p-6 hover:bg-white/[0.04] transition block"
         >
           <h3 className="text-[15px] font-medium mb-2">Idea Polishing Garage</h3>
           <p className="text-[13px] text-zinc-500 leading-relaxed">
-            Refine problem, ICP, wedge and pricing. Watch your score improve in real time.
+            Refine problem, ICP, wedge and pricing. Watch your score and market parameters improve in real time.
           </p>
         </Link>
 
-        {/* Coming soon cards */}
-        <div className="glass rounded-2xl p-6">
+        {/* 2. Related Idea Generator */}
+        <Link
+          href="/workshop/related"
+          className="glass rounded-2xl p-6 hover:bg-white/[0.04] transition block"
+        >
+          <h3 className="text-[15px] font-medium mb-2">Related Idea Generator</h3>
+          <p className="text-[13px] text-zinc-500 leading-relaxed">
+            Discover broader and adjacent ideas with clearer scope and stronger upside.
+          </p>
+        </Link>
+
+        {/* 3. MVP Architecture Brain */}
+        <Link
+          href="/workshop/architecture"
+          className="glass rounded-2xl p-6 hover:bg-white/[0.04] transition block"
+        >
+          <h3 className="text-[15px] font-medium mb-2">MVP Architecture Brain</h3>
+          <p className="text-[13px] text-zinc-500 leading-relaxed">
+            Generate system maps, feature blueprints, and a clear build order for your MVP.
+          </p>
+        </Link>
+
+        {/* Coming soon */}
+        <div className="glass rounded-2xl p-6 opacity-60">
           <h3 className="text-[15px] font-medium mb-2">Deeper Market Research</h3>
           <p className="text-[13px] text-zinc-500 leading-relaxed">
             Extra layers of demand signals, SEO opportunity, and competitor teardown.
           </p>
         </div>
-
-       <Link
-  href="/workshop/related"
+        <Link
+  href="/workshop/timer"
   className="glass rounded-2xl p-6 hover:bg-white/[0.04] transition block"
 >
-  <h3 className="text-[15px] font-medium mb-2">Related Idea Generator</h3>
+  <h3 className="text-[15px] font-medium mb-2">Builder Timer</h3>
   <p className="text-[13px] text-zinc-500 leading-relaxed">
-    Discover broader and adjacent ideas with higher potential based on your original concept.
+    Focus sessions and intentional breaks so you actually ship instead of switching tasks.
   </p>
 </Link>
-        <div className="glass rounded-2xl p-6">
-          <h3 className="text-[15px] font-medium mb-2">MVP Architecture Brain</h3>
-          <p className="text-[13px] text-zinc-500 leading-relaxed">
-            Generate system maps, feature blueprints, and downloadable PRDs ready for Cursor / v0.
-          </p>
-        </div>
 
-        <div className="glass rounded-2xl p-6">
+        <div className="glass rounded-2xl p-6 opacity-60">
           <h3 className="text-[15px] font-medium mb-2">Templates Library</h3>
           <p className="text-[13px] text-zinc-500 leading-relaxed">
             Proven structures for landing pages, pricing, onboarding, and launch sequences.
           </p>
         </div>
 
-        <div className="glass rounded-2xl p-6">
+        <div className="glass rounded-2xl p-6 opacity-60">
           <h3 className="text-[15px] font-medium mb-2">Score Improvement Loop</h3>
           <p className="text-[13px] text-zinc-500 leading-relaxed">
             Iterate on the idea until the validation score crosses your target threshold.
@@ -73,7 +88,7 @@ export default function WorkshopPage() {
       <div className="glass-strong rounded-2xl p-8 text-center">
         <h2 className="text-xl font-medium mb-2">More tools coming soon</h2>
         <p className="text-[14px] text-zinc-400 mb-6 max-w-md mx-auto">
-          We’re building the full intelligent workhouse. Start with Idea Polishing or run a Validation Report.
+          We’re building the full intelligent workhouse. Start with any of the live tools above.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link
