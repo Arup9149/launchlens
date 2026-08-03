@@ -1,8 +1,8 @@
 # LaunchLens — Project Status
 
 **Repository:** [Arup9149/launchlens](https://github.com/Arup9149/launchlens)  
-**Indexed at:** 2026-08-03  
-**Branch inspected:** `main`  
+**Last status update:** 2026-08-04  
+**Branch:** `main`  
 **Version (package.json):** `0.1.0`  
 **Status:** Early-stage MVP / pre-product-market-fit product surface
 
@@ -27,7 +27,7 @@ Monetization centers on an **Early Bird** pack (₹799 / ~$9 / ~€9): 2 validat
 |--------|--------|
 | Framework | Next.js **16.2.11** (App Router) |
 | UI | React **19.2.4**, Tailwind CSS **v4**, shadcn/ui (radix-nova style) |
-| Auth / DB | Supabase (`@supabase/ssr`, `@supabase/supabase-js`) |
+| Auth / DB | Supabase (`@supabase/ssr`, `@supabase/supabase-js`) — **not shown in product UI** |
 | Payments | Razorpay (primary); Stripe listed in deps but not wired in routes reviewed |
 | AI | OpenRouter (default cloud) + Ollama `qwen2.5:7b` (local / fallback) |
 | Validation | Zod in deps (light usage in app code) |
@@ -51,7 +51,9 @@ Monetization centers on an **Early Bird** pack (₹799 / ~$9 / ~€9): 2 validat
 |------|--------|--------|
 | Landing + pricing / region detection | Working UI | Region via language/timezone; prices hardcoded |
 | Waitlist | Implemented | Inserts into Supabase `waitlist` |
-| Auth (login / signup / signout) | Basic | Email/password via Supabase; no route protection on app pages |
+| Auth (login / signup / signout) | **Branded** | LaunchLens Logo + copy; no provider names in UI |
+| Forgot password | Implemented | `/auth/forgot-password` |
+| Email verification screen | Implemented | `/auth/verify-email` |
 | Validate flow + payment gate | Implemented | Razorpay ₹799; credits grant/use; sessionStorage + DB save |
 | Validation report | Implemented | Expandable sections, print-to-PDF, handoff to Workshop |
 | Dashboard | Implemented | Credits panel, recent validations, brain health |
@@ -71,39 +73,39 @@ Monetization centers on an **Early Bird** pack (₹799 / ~$9 / ~€9): 2 validat
 
 ## 4. Repository hygiene issues
 
-- **`.next` build output committed** under `launchlens/.next/` (and related chunks) — violates typical `.gitignore` intent; bloat and noise.
-- **`src1.zip`** committed at repo root.
-- **Duplicate / dead API tree:** `src/api/...` (Pages-Router-style paths) mirrors some App Router handlers; **not** the live Next App Router routes (`src/app/api/...` are the real ones).
-- Empty file: `src/api/waitlist/validations/route.ts` (0 bytes).
-- Sign-out redirects to `/login` but login lives at `/auth/login`.
-- Architecture page calls **`/api/razorpay/guide`** — **no such route exists** in the tree.
-- Stripe dependency unused in routes reviewed.
-- Navbar hardcodes “Early Bird · ₹799” even when landing supports multi-currency display.
+- **`.next` build output committed** under `launchlens/.next/` (and related chunks).  
+- **`src1.zip`** committed at repo root.  
+- **Duplicate / dead API tree:** `src/api/...`  
+- Sign-out redirects to `/login` but login lives at `/auth/login`.  
+- Architecture page calls **`/api/razorpay/guide`** — route missing.  
+- Stripe dependency unused in routes reviewed.  
+- Navbar hardcodes “Early Bird · ₹799”.
 
 ---
 
 ## 5. Security / correctness risks (high level)
 
-- Many API routes use **anon Supabase client** with **no auth check** — list/get/insert validations and credit mutations are effectively open if RLS is not strict.
-- Credits identified by **email query param / body**, not session user — easy to guess or share.
-- Payment success grants credits in **client handler** after Razorpay checkout (no verified webhook path observed) — vulnerable to incomplete verification if not completed server-side.
+- Many API routes use **anon Supabase client** with **no auth check**.  
+- Credits identified by **email**, not session user.  
+- Payment success grants credits in **client handler** (no webhook).  
 - AI routes have no rate limiting or auth in code reviewed.
 
 ---
 
 ## 6. Recommended next engineering priorities
 
-1. Remove committed `.next`, `src1.zip`, and dead `src/api/**` tree; enforce gitignore.  
-2. Document real setup in README (env, Ollama, Supabase schema, Razorpay).  
-3. Add RLS + authenticated server clients for validations/credits; bind credits to `auth.users`.  
-4. Implement Razorpay webhook + signature verification; remove client-only credit grant as sole path.  
-5. Unify Brain provider (OpenRouter + Ollama) for architecture/related the same way as analyze/polish.  
+1. Remove committed `.next`, `src1.zip`, and dead `src/api/**` tree.  
+2. Document real setup in README.  
+3. RLS + authenticated server clients; bind credits to `auth.users`.  
+4. Razorpay webhook + signature verification.  
+5. Unify Brain provider for architecture/related.  
 6. Implement or remove `/api/razorpay/guide`.  
-7. Protect `(app)` routes behind auth (or explicit public marketing vs app split).  
-8. Add minimal e2e or API tests for analyze + credits + payment happy path.
+7. Protect `(app)` routes behind auth.  
+8. Fix sign-out redirect to `/auth/login`.  
+9. Minimal tests for analyze + credits + payment.
 
 ---
 
 ## 7. Overall assessment
 
-The product **surface is largely built end-to-end as a founder-facing MVP**: landing, paid validation, report, workshop tools, and guides. The **Brain integration** is the core differentiator and is relatively mature for analyze/polish. Gaps are mainly **production readiness** (authz, payment verification, repo hygiene, docs, missing guide payment API) rather than missing primary UI features.
+MVP product surface is largely built. Auth UI now presents **LaunchLens-only** branding. Remaining gaps are production readiness (authz, payment verification, repo hygiene) rather than primary founder-facing flows.

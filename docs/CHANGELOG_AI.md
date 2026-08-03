@@ -5,6 +5,31 @@ Newest entries first.
 
 ---
 
+## 2026-08-04 — LaunchLens-branded authentication UI
+
+**Agent:** Grok (xAI) — Lead Software Architect  
+**Scope:** User-facing auth branding only
+
+### Actions
+
+1. Updated `/auth/login` — Logo, "Welcome back to LaunchLens", founder-focused subheading, "Sign In" CTA, forgot-password link, friendly error mapping (no provider names in UI).
+2. Updated `/auth/signup` — Logo, "Create your LaunchLens account", "Start validating startup ideas with AI.", "Create Account" CTA; post-signup redirect to verify page when session not immediate.
+3. Added `/auth/forgot-password` — "Reset your password" / "We'll help you get back into LaunchLens."
+4. Added `/auth/verify-email` — "Verify your email" / "Confirm your email address to activate your LaunchLens workspace."
+5. Auth logic, routes for login/signup/signout, and Supabase client integration **unchanged** (still `signInWithPassword` / `signUp` / `resetPasswordForEmail`).
+
+### Application code
+
+- Modified: `src/app/auth/login/page.tsx`, `src/app/auth/signup/page.tsx`
+- Added: `src/app/auth/forgot-password/page.tsx`, `src/app/auth/verify-email/page.tsx`
+
+### Verification
+
+- No user-visible "Supabase" strings on auth pages (provider remains in import paths / server env only).
+- Glass + Logo visual identity consistent with product shell.
+
+---
+
 ## 2026-08-03 — Architect session bootstrap: complete docs suite
 
 **Agent:** Grok (xAI) — Lead Software Architect role  
@@ -41,28 +66,13 @@ Newest entries first.
 ### Actions
 
 1. Recursive tree of `Arup9149/launchlens` (`main`).  
-2. Read all meaningful source, config, and documentation files (App Router pages, API routes, components, lib, package/config).  
+2. Read all meaningful source, config, and documentation files.  
 3. Explicitly noted non-source bulk: committed `launchlens/.next/**`, `src1.zip`, dead `src/api/**`.  
-4. Authored and committed documentation:
-
-   | File | Role |
-   |------|------|
-   | `docs/PROJECT_STATUS.md` | Product status, stack, risks, priorities |
-   | `docs/ARCHITECTURE.md` | System diagram, directory map, flows, security |
-   | `docs/FEATURE_INVENTORY.md` | Feature-by-feature Done/Partial/Missing/Broken |
-   | `docs/AI_HANDOFF.md` | Orientation for the next human/agent |
-   | `docs/NEXT_TASKS.md` | Prioritized backlog (P0–P3) |
-   | `docs/CHANGELOG_AI.md` | This log |
+4. Authored initial documentation pack under `docs/`.
 
 ### Application code
 
-**Not modified.** No changes to `src/`, config runtime behavior, or dependencies.
-
-### Findings captured (high level)
-
-- MVP UI surface largely complete (landing, validate, report, workshop, guides, credits).  
-- Production gaps: unauthenticated data APIs, client-side credit grant after payment, missing `/api/razorpay/guide`, Ollama-only architecture/related Brain, repo hygiene (`.next`, zip, dead `src/api`).  
-- Identity model split: Supabase Auth vs email-keyed credits.
+**Not modified.**
 
 ### Follow-up
 
