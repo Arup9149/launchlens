@@ -1,402 +1,402 @@
 "use client"
 
-import { useSearchParams } from "next/navigation"
-import Link from "next/link"
-import { Suspense, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 
-type Analysis = {
-  idea: string
-  score: number
-  verdict: string
-  confidence: number
-  verdictNote?: string
-  demand?: string
-  competition?: string
-  risks?: string
-  nextSteps?: string
-  breakdown?: {
-    marketDemand: number
-    competitionGap: number
-    feasibility: number
-    timing: number
-    monetization: number
+declare global {
+  interface Window {
+    Razorpay: any
   }
 }
 
-function ResultContent() {
-  const searchParams = useSearchParams()
-  const [analysis, setAnalysis] = useState<Analysis | null>(null)
-  const [expanded, setExpanded] = useState<string | null>("demand")
+export default function ValidatePage() {
+  const [idea, setIdea] = useState("")
+  const [email, setEmail] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [status, setStatus] = useState("")
+  const [brainOk, setBrainOk] = useState<boolean | null>(null)
+  const [brainMsg, setBrainMsg] = useState("")
+  const [credits, setCredits] = useState<number | null>(null)
+  const router = useRouter()
+
+  const skipPayment = process.env.NEXT_PUBLIC_SKIP_PAYMENT === "true"
 
   useEffect(() => {
-    const load = async () => {
-      const id = searchParams.get("id")
+    const saved = localStorage.getItem("ll_email")
+    if (saved) setEmail(saved)
 
-      if (id) {
-        try {
-          const res = await fetch(`/api/validations/${id}`)
-          const json = await res.json()
-          if (json?.data?.analysis) {
-            setAnalysis(json.data.analysis)
-            return
-          }
-          if (json?.data) {
-            setAnalysis({
-              idea: json.data.idea,
-              score: json.data.score,
-              verdict: json.data.verdict,
-              confidence: json.data.confidence,
-              verdictNote: json.data.analysis?.verdictNote,
-              demand: json.data.analysis?.demand,
-              competition: json.data.analysis?.competition,
-              risks: json.data.analysis?.risks,
-              nextSteps: json.data.analysis?.nextSteps,
-              breakdown: json.data.analysis?.breakdown,
-            })
-            return
-          }
-        } catch {}
-      }
-
-      const raw = sessionStorage.getItem("ll_analysis")
-      if (raw) {
-        try {
-          setAnalysis(JSON.parse(raw))
-          return
-        } catch {}
-      }
-
-      setAnalysis({
-        idea: searchParams.get("idea") || "Your idea",
-        score: Number(searchParams.get("score") || 78),
-        verdict: searchParams.get("verdict") || "Go",
-        confidence: Number(searchParams.get("confidence") || 84),
-        verdictNote: "Based on available signals",
-        demand:
-          "Demand signals will appear here once the Brain has processed the idea.",
-        competition: "Competitive landscape analysis will appear here.",
-        risks: "Key risks and assumptions will appear here.",
-        nextSteps:
-          "1. Polish the idea in the Workshop\n2. Talk to potential users\n3. Build a thin MVP",
-        breakdown: {
-          marketDemand: 72,
-          competitionGap: 65,
-          feasibility: 80,
-          timing: 70,
-          monetization: 68,
-        },
+    fetch("/api/brain/health")
+      .then((r) => r.json())
+      .then((d) => {
+        setBrainOk(!!d.ok)
+        setBrainMsg(d.message || "")
       })
+      .catch(() => {
+        setBrainOk(false)
+        setBrainMsg("Could not reach Brain")
+      })
+  }, [])
+
+  useEffect(() => {
+    const e = email.trim().toLowerCase()
+    if (!e.includes("@")) {
+      setCredits(null)
+      return
+    }
+    localStorage.setItem("ll_email", e)
+    fetch(`/api/credits?email=${encodeURIComponent(e)}`)
+      .then((r) => r.json())
+      .then((d) => setCredits(typeof d.credits === "number" ? d.credits : 0))
+      .catch(() => setCredits(0))
+  }, [email])
+
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) {
+        resolve(true)
+        return
+      }
+      const script = document.createElement("script")
+      script.src = "https://checkout.razorpay.com/v1/checkout.js"
+      script.onload = () => resolve(true)
+      script.onerror = () => resolve(false)
+      document.body.appendChild(script)
+    })
+  }
+
+  const grantCredits = async (userEmail: string) => {
+    try {
+      await fetch("/api/credits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: userEmail,
+          action: "grant",
+          amount: 2,
+          plan: "early_bird",
+        }),
+      })
+    } catch (err) {
+      console.error("Grant credits failed", err)
+    }
+  }
+
+  const useCredit = async (userEmail: string) => {
+    const res = await fetch("/api/credits", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: userEmail,
+        action: "use",
+      }),
+    })
+    const data = await res.json()
+    if (!res.ok) {
+      throw new Error(data.error || "No validations remaining")
+    }
+    setCredits(typeof data.credits === "number" ? data.credits : 0)
+    return data
+  }
+
+  const unlockGuides = () => {
+    localStorage.setItem("ll_guides_unlocked", "1")
+    // One tab is more reliable than two (popup blockers)
+    window.open("/guides/starter", "_blank")
+  }
+
+  const goToResult = (
+    analysis: any,
+    score: number,
+    verdict: string,
+    confidence: number,
+    validationId?: string
+  ) => {
+    sessionStorage.setItem(
+      "ll_analysis",
+      JSON.stringify({ idea: idea.trim(), ...analysis })
+    )
+
+    const params = new URLSearchParams({
+      idea: idea.trim(),
+      score: String(score),
+      verdict,
+      confidence: String(confidence),
+      paid: "1",
+    })
+    if (validationId) params.set("id", validationId)
+    router.push(`/validate/result?${params.toString()}`)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!idea.trim() || loading) return
+
+    const userEmail = email.trim().toLowerCase()
+    if (!userEmail.includes("@")) {
+      alert("Enter the email for your Early Bird credits")
+      return
     }
 
-    load()
-  }, [searchParams])
+    localStorage.setItem("ll_email", userEmail)
 
-  if (!analysis) {
-    return (
-      <div className="p-16 text-center text-zinc-500">Loading report...</div>
-    )
-  }
+    if (brainOk === false) {
+      alert("Brain is offline. Open Ollama and retry.")
+      return
+    }
 
-  const {
-    idea,
-    score,
-    verdict,
-    confidence,
-    verdictNote = "Based on current signals",
-    demand = "No demand analysis available.",
-    competition = "No competition analysis available.",
-    risks = "No risk analysis available.",
-    nextSteps = "No next steps available.",
-    breakdown = {
-      marketDemand: score,
-      competitionGap: score - 5,
-      feasibility: score + 5,
-      timing: score - 2,
-      monetization: score - 8,
-    },
-  } = analysis
+    setLoading(true)
+    setStatus("Checking credits...")
 
-  const verdictColor =
-    verdict === "Go"
-      ? "text-emerald-400"
-      : verdict === "Pivot"
-      ? "text-amber-400"
-      : "text-red-400"
+    try {
+      const creditRes = await fetch(
+        `/api/credits?email=${encodeURIComponent(userEmail)}`
+      )
+      const creditData = await creditRes.json()
+      const remaining =
+        typeof creditData.credits === "number" ? creditData.credits : 0
+      const hasCredit = remaining > 0
 
-  const parameters = [
-    {
-      label: "Market Demand",
-      score: breakdown.marketDemand,
-      color: "bg-emerald-500",
-    },
-    {
-      label: "Competition Gap",
-      score: breakdown.competitionGap,
-      color: "bg-violet-500",
-    },
-    {
-      label: "Feasibility",
-      score: breakdown.feasibility,
-      color: "bg-sky-500",
-    },
-    { label: "Timing", score: breakdown.timing, color: "bg-amber-500" },
-    {
-      label: "Monetization",
-      score: breakdown.monetization,
-      color: "bg-fuchsia-500",
-    },
-  ]
+      if (!hasCredit && !skipPayment) {
+        setStatus("Connecting to Brain...")
 
-  const ideaParam = encodeURIComponent(idea)
+        const analyzeRes = await fetch("/api/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ idea: idea.trim() }),
+        })
+        const analyzeData = await analyzeRes.json()
+        if (!analyzeRes.ok || !analyzeData.analysis) {
+          throw new Error(analyzeData.error || "Brain analysis failed")
+        }
 
-  const handleDownloadPDF = () => {
-    window.print()
+        const analysis = analyzeData.analysis
+        const score = analysis.score
+        const verdict = analysis.verdict
+        const confidence = analysis.confidence
+
+        setStatus("Saving result...")
+        const saveRes = await fetch("/api/validations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            idea: idea.trim(),
+            score,
+            verdict,
+            confidence,
+            analysis: { idea: idea.trim(), ...analysis },
+          }),
+        })
+        const saveData = await saveRes.json()
+        const validationId = saveData?.id
+
+        setStatus("Opening payment...")
+        const orderRes = await fetch("/api/razorpay/order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            idea: idea.trim(),
+            score,
+            verdict,
+            confidence,
+          }),
+        })
+        const orderData = await orderRes.json()
+        if (!orderData.orderId) {
+          throw new Error(orderData.error || "Failed to create order")
+        }
+
+        const scriptLoaded = await loadRazorpayScript()
+        if (!scriptLoaded) {
+          throw new Error("Failed to load payment gateway")
+        }
+
+        const options = {
+          key: orderData.key,
+          amount: orderData.amount,
+          currency: orderData.currency,
+          name: "LaunchLens",
+          description: "Early Bird · 2 validations · ₹799",
+          order_id: orderData.orderId,
+          prefill: { email: userEmail },
+          handler: async function () {
+            await grantCredits(userEmail)
+            try {
+              await useCredit(userEmail)
+            } catch {}
+            unlockGuides()
+            goToResult(analysis, score, verdict, confidence, validationId)
+          },
+          theme: { color: "#7c3aed" },
+          modal: {
+            ondismiss: function () {
+              setLoading(false)
+              setStatus("")
+            },
+          },
+        }
+
+        const rzp = new window.Razorpay(options)
+        rzp.open()
+        return
+      }
+
+      if (hasCredit && !skipPayment) {
+        setStatus("Using 1 credit...")
+        await useCredit(userEmail)
+      }
+
+      setStatus("Connecting to Brain...")
+      const analyzeRes = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idea: idea.trim() }),
+      })
+      const analyzeData = await analyzeRes.json()
+      if (!analyzeRes.ok || !analyzeData.analysis) {
+        throw new Error(analyzeData.error || "Brain analysis failed")
+      }
+
+      const analysis = analyzeData.analysis
+      const score = analysis.score
+      const verdict = analysis.verdict
+      const confidence = analysis.confidence
+
+      setStatus("Saving result...")
+      const saveRes = await fetch("/api/validations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          idea: idea.trim(),
+          score,
+          verdict,
+          confidence,
+          analysis: { idea: idea.trim(), ...analysis },
+        }),
+      })
+      const saveData = await saveRes.json()
+      const validationId = saveData?.id
+
+      if (skipPayment) {
+        localStorage.setItem("ll_guides_unlocked", "1")
+      }
+
+      setStatus("Opening report...")
+      goToResult(analysis, score, verdict, confidence, validationId)
+    } catch (err: any) {
+      console.error(err)
+      alert(err.message || "Something went wrong")
+      setLoading(false)
+      setStatus("")
+    }
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
-      <div className="mb-10 print:hidden">
-        <Link
-          href="/validate"
-          className="text-[13px] text-zinc-500 hover:text-white transition mb-6 inline-block"
-        >
-          ← Validate another idea
-        </Link>
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-medium tracking-tight mb-2">
-              Validation Report
-            </h1>
-            <p className="text-[15px] text-zinc-500">
-              Powered by LaunchLens Brain
-            </p>
-          </div>
-          <button
-            onClick={handleDownloadPDF}
-            className="shrink-0 text-[13px] font-medium px-5 py-2.5 rounded-full border border-white/10 text-zinc-300 hover:bg-white/5 transition"
-          >
-            Download PDF
-          </button>
-        </div>
-      </div>
-
-      <div className="glass rounded-2xl p-6 mb-8 print:border print:border-zinc-300">
-        <p className="text-[11px] uppercase tracking-[0.15em] text-zinc-500 mb-2">
-          Analyzed Idea
-        </p>
-        <p className="text-[15px] text-zinc-200 leading-relaxed">{idea}</p>
-      </div>
-
-      <div className="grid md:grid-cols-3 gap-4 mb-10">
-        <div className="glass rounded-2xl p-6 flex flex-col items-center justify-center text-center print:border print:border-zinc-300">
-          <p className="text-[11px] uppercase tracking-[0.15em] text-zinc-500 mb-4">
-            Overall Score
-          </p>
-          <div className="relative w-28 h-28 mb-3">
-            <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-              <path
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none"
-                stroke="rgba(255,255,255,0.06)"
-                strokeWidth="3"
-              />
-              <path
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none"
-                stroke="url(#scoreGradient)"
-                strokeWidth="3"
-                strokeDasharray={`${score}, 100`}
-                strokeLinecap="round"
-              />
-              <defs>
-                <linearGradient
-                  id="scoreGradient"
-                  x1="0%"
-                  y1="0%"
-                  x2="100%"
-                  y2="0%"
-                >
-                  <stop offset="0%" stopColor="#a78bfa" />
-                  <stop offset="100%" stopColor="#c084fc" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-3xl font-medium tracking-tight">{score}</span>
-            </div>
-          </div>
-          <p className="text-[13px] text-zinc-500">out of 100</p>
-        </div>
-
-        <div className="glass rounded-2xl p-6 flex flex-col items-center justify-center text-center print:border print:border-zinc-300">
-          <p className="text-[11px] uppercase tracking-[0.15em] text-zinc-500 mb-4">
-            Verdict
-          </p>
-          <p className={`text-4xl font-medium tracking-tight mb-2 ${verdictColor}`}>
-            {verdict}
-          </p>
-          <p className="text-[13px] text-zinc-400 max-w-[200px] leading-snug">
-            {verdictNote}
-          </p>
-        </div>
-
-        <div className="glass rounded-2xl p-6 flex flex-col items-center justify-center text-center print:border print:border-zinc-300">
-          <p className="text-[11px] uppercase tracking-[0.15em] text-zinc-500 mb-4">
-            Confidence
-          </p>
-          <p className="text-4xl font-medium tracking-tight mb-2">{confidence}%</p>
-          <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden mt-2">
-            <div
-              className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full"
-              style={{ width: `${confidence}%` }}
-            />
-          </div>
-          <p className="text-[12px] text-zinc-500 mt-3">Signal strength</p>
-        </div>
-      </div>
-
-      <div className="glass rounded-2xl p-6 mb-8 print:border print:border-zinc-300">
-        <h3 className="text-[15px] font-medium mb-6">Score Breakdown</h3>
-        <div className="space-y-5">
-          {parameters.map((item) => (
-            <div key={item.label}>
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[13px] text-zinc-300">{item.label}</span>
-                <span className="text-[13px] font-medium text-zinc-200">
-                  {Math.max(0, Math.min(100, Math.round(item.score)))}
-                </span>
-              </div>
-              <div className="h-2 bg-white/[0.04] rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full ${item.color}`}
-                  style={{
-                    width: `${Math.max(0, Math.min(100, item.score))}%`,
-                  }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-3 mb-10">
-        {[
-          { id: "demand", title: "Market Demand Signals", content: demand },
-          {
-            id: "competition",
-            title: "Competitive Landscape",
-            content: competition,
-          },
-          { id: "risks", title: "Key Risks & Assumptions", content: risks },
-          { id: "next", title: "Recommended Next Steps", content: nextSteps },
-        ].map((section) => (
-          <div
-            key={section.id}
-            className="glass rounded-2xl overflow-hidden print:border print:border-zinc-300"
-          >
-            <button
-              onClick={() =>
-                setExpanded(expanded === section.id ? null : section.id)
-              }
-              className="w-full flex items-center justify-between p-5 text-left hover:bg-white/[0.02] transition print:hidden"
-            >
-              <span className="text-[14px] font-medium">{section.title}</span>
-              <span className="text-zinc-500 text-lg">
-                {expanded === section.id ? "−" : "+"}
-              </span>
-            </button>
-            <div
-              className={`px-5 pb-5 ${
-                expanded === section.id ? "block" : "hidden print:block"
+    <div className="max-w-2xl mx-auto px-6 py-16">
+      <div className="mb-10">
+        <div className="flex items-center gap-3 mb-3">
+          <h1 className="text-3xl font-medium tracking-tight">
+            Validate an idea
+          </h1>
+          {brainOk !== null && (
+            <span
+              className={`text-[11px] px-2.5 py-1 rounded-full border ${
+                brainOk
+                  ? "border-emerald-500/30 text-emerald-400"
+                  : "border-red-500/30 text-red-400"
               }`}
             >
-              <p className="text-[14px] text-zinc-400 leading-relaxed whitespace-pre-line">
-                {section.content}
-              </p>
-            </div>
-            <p className="hidden print:block px-5 pt-4 text-[14px] font-medium text-zinc-800">
-              {section.title}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      {/* Workshop continuum */}
-      <div className="space-y-4 mb-10 print:hidden">
-        <p className="text-[12px] uppercase tracking-[0.15em] text-zinc-500">
-          Continue in Workshop
-        </p>
-        <div className="grid sm:grid-cols-3 gap-3">
-          <Link
-            href={`/workshop/polish?idea=${ideaParam}`}
-            className="glass rounded-2xl p-5 hover:bg-white/[0.04] transition block"
-          >
-            <p className="text-[14px] font-medium mb-1">Polish Garage</p>
-            <p className="text-[12px] text-zinc-500">
-              Sharpen problem, ICP, wedge, pricing
-            </p>
-          </Link>
-          <Link
-            href={`/workshop/related?idea=${ideaParam}`}
-            className="glass rounded-2xl p-5 hover:bg-white/[0.04] transition block"
-          >
-            <p className="text-[14px] font-medium mb-1">Related Ideas</p>
-            <p className="text-[12px] text-zinc-500">
-              Expand into adjacent opportunities
-            </p>
-          </Link>
-          <Link
-            href={`/workshop/architecture?idea=${ideaParam}`}
-            className="glass rounded-2xl p-5 hover:bg-white/[0.04] transition block"
-          >
-            <p className="text-[14px] font-medium mb-1">Architecture</p>
-            <p className="text-[12px] text-zinc-500">
-              Modules, stack, and 30-day plan
-            </p>
-          </Link>
+              {brainOk ? "Brain online" : "Brain offline"}
+            </span>
+          )}
         </div>
+        <p className="text-[15px] text-zinc-500 leading-relaxed mb-4">
+          Describe your idea. After payment you unlock the report, 2 credits,
+          and Early Bird guides.
+        </p>
+
+        <div className="flex flex-wrap items-center gap-3 mb-2">
+          <div className="glass rounded-2xl px-4 py-3 inline-flex items-center gap-3">
+            <span className="text-[13px] text-zinc-500 line-through">₹5,999</span>
+            <span className="text-[16px] font-medium">₹799</span>
+            <span className="text-[11px] text-emerald-400">
+              Early Bird · 2 validations
+            </span>
+          </div>
+          {credits !== null && email.includes("@") && (
+            <div className="text-[12px] text-zinc-400">
+              Credits left:{" "}
+              <span className="text-white font-medium">{credits}</span>
+            </div>
+          )}
+        </div>
+
+        {brainMsg && !brainOk && (
+          <p className="text-[13px] text-red-400/90 mt-2">{brainMsg}</p>
+        )}
+        {skipPayment && (
+          <p className="text-[12px] text-amber-400/80 mt-2">
+            Dev mode: payment skipped
+          </p>
+        )}
       </div>
 
-      <div className="flex flex-wrap gap-3 print:hidden">
-        <Link
-          href="/validate"
-          className="text-[14px] font-medium px-6 py-2.5 rounded-full border border-white/10 text-zinc-300 hover:bg-white/5 transition"
-        >
-          Validate another
-        </Link>
-        <Link
-          href="/dashboard"
-          className="text-[14px] font-medium px-6 py-2.5 rounded-full bg-white/5 hover:bg-white/10 text-white transition"
-        >
-          Back to Dashboard
-        </Link>
-      </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label className="block text-[13px] text-zinc-400 mb-2.5">
+            Email (for credits)
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@email.com"
+            required
+            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl px-5 py-3 text-[15px] text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500/40 transition"
+          />
+        </div>
 
-      <style jsx global>{`
-        @media print {
-          body {
-            background: white !important;
-            color: #111 !important;
-          }
-          .glass,
-          .glass-strong {
-            background: white !important;
-            border: 1px solid #ddd !important;
-          }
-        }
-      `}</style>
+        <div>
+          <label className="block text-[13px] text-zinc-400 mb-2.5">
+            Your idea
+          </label>
+          <textarea
+            value={idea}
+            onChange={(e) => setIdea(e.target.value)}
+            placeholder="Describe the product clearly..."
+            rows={7}
+            required
+            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl px-5 py-4 text-[15px] text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500/40 transition resize-none leading-relaxed"
+          />
+        </div>
+
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-[13px] text-zinc-600">
+            {skipPayment
+              ? "Dev · Brain report only"
+              : credits && credits > 0
+              ? "Using 1 credit · no payment"
+              : "₹799 unlocks 2 credits + guides"}
+          </p>
+          <button
+            type="submit"
+            disabled={loading || !idea.trim() || brainOk === false}
+            className="shrink-0 bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-400 hover:to-violet-500 text-[14px] font-medium px-7 py-3 rounded-full text-white transition disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                {status || "Processing..."}
+              </span>
+            ) : credits && credits > 0 ? (
+              "Validate with credit"
+            ) : skipPayment ? (
+              "Validate with Brain"
+            ) : (
+              "Validate · ₹799"
+            )}
+          </button>
+        </div>
+      </form>
     </div>
-  )
-}
-
-export default function ResultPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="p-16 text-center text-zinc-500">Loading report...</div>
-      }
-    >
-      <ResultContent />
-    </Suspense>
   )
 }

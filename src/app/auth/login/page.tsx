@@ -11,13 +11,13 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
-  const supabase = createClient()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError("")
 
+    const supabase = createClient()
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -34,53 +34,57 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#07070a] flex items-center justify-center px-6">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-10">
-          <h1 className="text-2xl font-medium tracking-tight mb-2">Welcome back</h1>
-          <p className="text-[14px] text-zinc-500">Sign in to LaunchLens</p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center px-6">
+      <div className="w-full max-w-md glass rounded-2xl p-8">
+        <h1 className="text-2xl font-medium tracking-tight mb-2">Sign in</h1>
+        <p className="text-[14px] text-zinc-500 mb-8">
+          Access your LaunchLens workspace
+        </p>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
+            <label className="block text-[13px] text-zinc-400 mb-2">Email</label>
             <input
               type="email"
-              placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-[14px] text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500/40 transition"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-[14px] text-white focus:outline-none focus:border-violet-500/40 transition"
             />
           </div>
           <div>
+            <label className="block text-[13px] text-zinc-400 mb-2">
+              Password
+            </label>
             <input
               type="password"
-              placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-[14px] text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500/40 transition"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-[14px] text-white focus:outline-none focus:border-violet-500/40 transition"
             />
           </div>
 
-          {error && <p className="text-[13px] text-red-400">{error}</p>}
+          {error && (
+            <p className="text-[13px] text-red-400">{error}</p>
+          )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-400 hover:to-violet-500 text-[14px] font-medium py-3 rounded-xl text-white transition disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-400 hover:to-violet-500 text-[14px] font-medium py-3 rounded-full text-white transition disabled:opacity-40"
           >
             {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
-        <p className="text-center text-[13px] text-zinc-500 mt-8">
-          Don’t have an account?{" "}
+        <p className="text-[13px] text-zinc-500 text-center mt-6">
+          No account?{" "}
           <Link href="/auth/signup" className="text-violet-400 hover:text-violet-300">
-            Sign up
+            Create one
           </Link>
         </p>
       </div>
-    </main>
+    </div>
   )
 }

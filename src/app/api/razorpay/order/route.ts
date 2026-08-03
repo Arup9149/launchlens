@@ -6,14 +6,21 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET!,
 })
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
+    const body = await request.json().catch(() => ({}))
+    const { idea, score, verdict, confidence } = body
+
     const options = {
-      amount: 20000, // ₹200 in paise
+      amount: 79900, // ₹799
       currency: "INR",
-      receipt: `guide_${Date.now()}`,
+      receipt: `ll_eb_${Date.now()}`,
       notes: {
-        product: "coding_starter_guide",
+        product: "early_bird_2_validations",
+        idea: idea ? String(idea).slice(0, 200) : "",
+        score: score ?? "",
+        verdict: verdict ?? "",
+        confidence: confidence ?? "",
       },
     }
 
