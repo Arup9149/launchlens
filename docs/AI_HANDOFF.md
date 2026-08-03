@@ -31,6 +31,11 @@ Related docs in this folder:
 - `FEATURE_INVENTORY.md` — feature-by-feature status  
 - `NEXT_TASKS.md` — prioritized work  
 - `CHANGELOG_AI.md` — agent activity log  
+- `ENGINEERING_RULES.md` — binding conventions and governance  
+- `API_REFERENCE.md` — HTTP API contracts  
+- `DATABASE.md` — schema and RLS guidance  
+- `DEPLOYMENT.md` — env, local, production  
+- `ROADMAP.md` — product horizons  
 
 ---
 
@@ -133,3 +138,9 @@ Prefer small PR-sized commits with clear messages.
 ## 9. Agent rules already in repo
 
 - `AGENTS.md` / `CLAUDE.md` note that this Next.js version may differ from training data; check `node_modules/next/dist/docs/` when coding against Next APIs.
+
+---
+
+## 10. Session protocol (Lead Architect)
+
+At session start: read all files under `docs/` listed in the required structure, list latest commits, compare docs to code, update docs before implementing features. Architecture is frozen unless explicitly approved. One production-quality feature per cycle with what/why/files/risks/verification before coding.

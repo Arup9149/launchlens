@@ -5,6 +5,34 @@ Newest entries first.
 
 ---
 
+## 2026-08-03 — Architect session bootstrap: complete docs suite
+
+**Agent:** Grok (xAI) — Lead Software Architect role  
+**Scope:** Documentation only (no application code)
+
+### Actions
+
+1. Session start protocol: listed `docs/`, latest commits on `main` (`aaba822` HEAD).  
+2. Compared required docs structure vs repository.  
+3. **Created missing documents** and committed to `docs/`:
+   - `ENGINEERING_RULES.md` — coding, ownership, security, git, governance  
+   - `API_REFERENCE.md` — live App Router endpoints  
+   - `DATABASE.md` — inferred schema + RLS guidance  
+   - `DEPLOYMENT.md` — env, local, Vercel, smoke checklist  
+   - `ROADMAP.md` — Horizons A–D aligned with NEXT_TASKS  
+4. Existing six docs remain authoritative for status/architecture/features.
+
+### Application code
+
+**Not modified.**
+
+### Notes
+
+- Architecture remains frozen pending explicit product approval for structural change.  
+- Next implementation should follow NEXT_TASKS P0/P2 hygiene or security items with a written what/why/files/risks/verification plan.
+
+---
+
 ## 2026-08-03 — Full repository index + documentation pack
 
 **Agent:** Grok (xAI) via GitHub connector  
