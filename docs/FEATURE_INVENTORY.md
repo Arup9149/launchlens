@@ -1,6 +1,6 @@
 # LaunchLens — Feature Inventory
 
-**Last updated:** 2026-08-04 (Launch Readiness — Founder Experience Refinement)
+**Last updated:** 2026-08-04 (Launch Readiness — Authentication UX)
 
 ### Platform
 
@@ -11,6 +11,9 @@
 | Custom 404 | **Done** |
 | Skip link + focus-visible | **Done** |
 | Sign-out → `/auth/login` | **Done** |
+| Navbar Sign In + Start Free | **Done** |
+| Protected product routes (middleware) | **Done** |
+| Login `next` redirect | **Done** |
 | Profile page | **Missing** |
 
 ### Early Founder experience

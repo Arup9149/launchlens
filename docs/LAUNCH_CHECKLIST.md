@@ -1,6 +1,17 @@
 # LaunchLens — Launch Checklist
 
-**Last updated:** 2026-08-04 (Sprint 2 responsive QA)
+**Last updated:** 2026-08-04 (Authentication UX)
+
+---
+
+## 0. Authentication entry
+
+- [x] Navbar Sign In + Start Free → signup
+- [x] Landing primary CTA Start Free → signup
+- [x] Protected product routes redirect to login
+- [x] Login supports `next` return path
+- [x] Sign out from app shell
+- [x] Existing signup / login / forgot-password / verify-email linked
 
 ---
 
