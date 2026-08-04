@@ -25,10 +25,10 @@ export default function ValidatePage() {
     const saved = localStorage.getItem("ll_email")
     if (saved) setEmail(saved)
 
-    fetch("/api/brain/health")
+    fetch("/api/brain/health", { cache: "no-store" })
       .then((r) => r.json())
       .then((d) => {
-        setBrainOk(!!d.ok)
+        setBrainOk(!!(d.online ?? d.ok))
         setBrainMsg(d.message || "")
       })
       .catch(() => {
@@ -40,7 +40,7 @@ export default function ValidatePage() {
   useEffect(() => {
     const e = email.trim().toLowerCase()
     if (e.includes("@")) localStorage.setItem("ll_email", e)
-    fetch("/api/credits")
+    fetch("/api/credits", { cache: "no-store" })
       .then((r) => {
         if (r.status === 401) {
           setCredits(null)
@@ -83,7 +83,6 @@ export default function ValidatePage() {
     return data
   }
 
-  /** Server verifies Razorpay signature and grants credits (no client grant). */
   const verifyPayment = async (response: {
     razorpay_order_id: string
     razorpay_payment_id: string
@@ -143,7 +142,10 @@ export default function ValidatePage() {
     localStorage.setItem("ll_email", userEmail)
 
     if (brainOk === false) {
-      alert("The Brain is offline right now. Start Ollama locally or set OPENROUTER_API_KEY, then try again.")
+      alert(
+        brainMsg ||
+          "Brain is temporarily unavailable. Check OPENROUTER_API_KEY on the host and try again."
+      )
       return
     }
 
@@ -151,7 +153,7 @@ export default function ValidatePage() {
     setStatus("Checking your Founder Validations…")
 
     try {
-      const creditRes = await fetch("/api/credits")
+      const creditRes = await fetch("/api/credits", { cache: "no-store" })
       if (creditRes.status === 401) {
         alert("Sign in to validate and unlock your Founder Validations.")
         setLoading(false)
