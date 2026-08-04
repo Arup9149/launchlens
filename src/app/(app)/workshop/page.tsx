@@ -2,7 +2,7 @@ import Link from "next/link"
 
 export default function WorkshopPage() {
   return (
-    <div className="max-w-5xl mx-auto px-6 py-16">
+    <div className="max-w-5xl mx-auto safe-px py-16">
       <div className="mb-12">
         <p className="text-[12px] uppercase tracking-[0.2em] text-violet-400/80 mb-3">
           Workspace
