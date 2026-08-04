@@ -36,9 +36,9 @@ export default function DashboardPage() {
       })
       .catch(() => setLoading(false))
 
-    fetch("/api/brain/health")
+    fetch("/api/brain/health", { cache: "no-store" })
       .then((r) => r.json())
-      .then((d) => setBrainOk(!!d.ok))
+      .then((d) => setBrainOk(!!(d.online ?? d.ok)))
       .catch(() => setBrainOk(false))
   }, [])
 
@@ -46,7 +46,7 @@ export default function DashboardPage() {
     if (email && email.includes("@")) {
       localStorage.setItem("ll_email", email.trim().toLowerCase())
     }
-    fetch("/api/credits")
+    fetch("/api/credits", { cache: "no-store" })
       .then((r) => {
         if (r.status === 401) {
           setCredits(null)
@@ -201,34 +201,44 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid sm:grid-cols-2 gap-3 mb-12">
-        <a
-          href="/founder/launchlens-founder-playbook.pdf"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="glass rounded-2xl p-5 hover:bg-white/[0.04] transition block"
+        <button
+          type="button"
+          onClick={() => {
+            const name =
+              validations[0]?.idea?.slice(0, 60) || "Your Startup"
+            void import("@/lib/founder-print").then((m) =>
+              m.printFounderPlaybook({ startupName: name, idea: validations[0]?.idea })
+            )
+          }}
+          className="glass rounded-2xl p-5 hover:bg-white/[0.04] transition block text-left w-full"
         >
           <p className="text-[12px] uppercase tracking-[0.14em] text-violet-400 mb-1">
             Founder resource
           </p>
           <h3 className="text-[14px] font-medium mb-1.5">Founder Playbook</h3>
           <p className="text-[12px] text-zinc-500 leading-relaxed">
-            A practical handbook on validation, pricing, MVP, and founder systems.
+            Personalized handbook — open print dialog to save as PDF.
           </p>
-        </a>
-        <a
-          href="/founder/launch-in-20-days.pdf"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="glass rounded-2xl p-5 hover:bg-white/[0.04] transition block"
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            const name =
+              validations[0]?.idea?.slice(0, 60) || "Your Startup"
+            void import("@/lib/founder-print").then((m) =>
+              m.printBuilderProgram({ startupName: name, idea: validations[0]?.idea })
+            )
+          }}
+          className="glass rounded-2xl p-5 hover:bg-white/[0.04] transition block text-left w-full"
         >
           <p className="text-[12px] uppercase tracking-[0.14em] text-violet-400 mb-1">
             Builder program
           </p>
           <h3 className="text-[14px] font-medium mb-1.5">Launch in 20 Days</h3>
           <p className="text-[12px] text-zinc-500 leading-relaxed">
-            A guided execution workbook from idea to launch-ready MVP.
+            Personalized 20-day workbook — open print dialog to save as PDF.
           </p>
-        </a>
+        </button>
       </div>
 
       <div className="mb-4 flex items-center justify-between">
