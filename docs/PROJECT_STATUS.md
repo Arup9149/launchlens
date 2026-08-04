@@ -1,84 +1,41 @@
 # LaunchLens — Project Status
 
 **Repository:** [Arup9149/launchlens](https://github.com/Arup9149/launchlens)  
-**Last status update:** 2026-08-04  
+**Last status update:** 2026-08-04 (Sprint A/B founder UX + email system)  
 **Branch:** `main`  
-**Version (package.json):** `0.1.0`  
-**Status:** Early-stage MVP — global payment **architecture** in place; India checkout live via Razorpay; international Stripe **not yet charging**
+**Version:** `0.1.0`  
+**Status:** Early-stage MVP — India Razorpay live; international Stripe stub; waitlist email + premium founder UX
 
 ---
 
-## 1. What the product is
-
-**LaunchLens** is a founder workspace: Validate → Polish → Expand → Architect, with an LLM Brain and Early Bird monetization.
-
-**Pricing (catalog):** Early Bird ≈ ₹799 / $9 / €9 / £9 · 2 validation credits + guides + Workshop.
-
----
-
-## 2. Tech stack
-
-| Layer | Choice |
-|--------|--------|
-| Framework | Next.js 16 App Router |
-| UI | React 19, Tailwind v4, shadcn |
-| Auth / DB | Supabase (hidden in product UI) |
-| **Payments** | **Abstraction in `src/lib/payments`** — Razorpay (IN, live), Stripe (ROW, stub) |
-| AI | OpenRouter + Ollama |
-
-**Payment env (current + reserved):**
-
-- `NEXT_PUBLIC_RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`  
-- `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (reserved; not required until Stripe ships)
-
----
-
-## 3. Completeness snapshot
+## Completeness snapshot (highlights)
 
 | Area | State | Notes |
 |------|--------|--------|
-| Landing region price labels | Working UI | Client detect; should adopt shared catalog/quote |
-| Auth UI | Branded | LaunchLens-only copy |
-| Validate + Razorpay (IN) | Live path | Still client-side credit grant |
-| **Payment domain layer** | **Done** | types, catalog, region, registry |
-| **Quote / order APIs** | **Done** | `/api/payments/quote`, `/api/payments/order` |
-| Stripe checkout | **Stub** | Routes to Stripe; returns 503 until implemented |
-| Payment webhooks | **Missing** | P0 |
+| Landing + region price labels | Working UI | Client detect |
+| Waitlist | Implemented | Premium success UX + Resend welcome (best-effort) |
+| Email design system | **Done** | Shared shell in `lib/email/brand.ts` |
+| Launch checklist | **Done** | `docs/LAUNCH_CHECKLIST.md` |
+| Auth UI | Branded | LaunchLens-only copy + tagline |
+| Validate + Razorpay (IN) | Live path | Founder-focused status copy |
+| Payment domain layer | Done | Razorpay live; Stripe stub |
 | Workshop / Brain | Implemented | Architecture/related Ollama-only |
 | Credits | Email-keyed | Not auth-user-keyed |
-| README | Stale | — |
 
 ---
 
-## 4. Global payments strategy (summary)
+## Sprint A / B (this cycle)
 
-- **India → Razorpay / INR**  
-- **International → Stripe / USD·EUR·GBP** (display + routing ready; charge flow next)  
-- Additional providers plug into `providers/registry.ts` without changing validate/business rules  
-- Legacy `/api/razorpay/order` remains as a thin wrapper  
+- **A:** Waitlist success/duplicate/loading experience; validate loading & alert messaging  
+- **B:** Email design tokens + shell; env-ready `team@launchlens.ai` (no DNS in sprint); `LAUNCH_CHECKLIST.md`  
 
 ---
 
-## 5. Risks (high level)
+## Next priorities
 
-- Client-only payment fulfillment  
-- Open validations/credits APIs without strong RLS  
-- International users see price but cannot complete Stripe checkout yet  
-- Validate CTA still emphasizes ₹ in several strings  
+1. Stripe PaymentIntent + webhooks (P0-5 / P0-1)  
+2. RLS + auth-bound credits  
+3. Wire validate/landing to `/api/payments/quote`  
+4. Repo hygiene  
 
----
-
-## 6. Next engineering priorities
-
-1. Implement Stripe `createOrder` (PaymentIntent) + webhook credit grant  
-2. Razorpay webhook; stop relying on client grant alone  
-3. Point validate + landing at `/api/payments/quote` for display  
-4. RLS + auth-bound credits  
-5. Repo hygiene + README  
-6. Brain provider parity  
-
----
-
-## 7. Assessment
-
-Product surface remains an end-to-end founder MVP. Payment **architecture is global-first**; **India can charge today**; **rest-of-world is quote-ready and charge-blocked** until Stripe is implemented behind the same interface.
+See `docs/NEXT_TASKS.md` and `docs/LAUNCH_CHECKLIST.md`.
