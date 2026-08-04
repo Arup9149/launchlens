@@ -40,18 +40,24 @@ export default function DashboardPage() {
   }, [])
 
   useEffect(() => {
-    if (!email || !email.includes("@")) {
-      setCredits(null)
-      return
+    if (email && email.includes("@")) {
+      localStorage.setItem("ll_email", email.trim().toLowerCase())
     }
-    localStorage.setItem("ll_email", email.trim().toLowerCase())
-    fetch(`/api/credits?email=${encodeURIComponent(email.trim().toLowerCase())}`)
-      .then((r) => r.json())
+    fetch("/api/credits")
+      .then((r) => {
+        if (r.status === 401) {
+          setCredits(null)
+          setPlan(null)
+          return null
+        }
+        return r.json()
+      })
       .then((d) => {
+        if (!d) return
         setCredits(typeof d.credits === "number" ? d.credits : 0)
         setPlan(d.plan || null)
       })
-      .catch(() => setCredits(0))
+      .catch(() => setCredits(null))
   }, [email])
 
   const getVerdictColor = (verdict: string) => {
@@ -135,7 +141,7 @@ export default function DashboardPage() {
                 ? "Early Bird plan · 2 validations pack"
                 : plan
                 ? `Plan: ${plan}`
-                : "Enter the email you used at payment"}
+                : "Sign in to load your credits"}
             </p>
             {creditMsg && (
               <p className="text-[12px] text-emerald-400 mt-1">{creditMsg}</p>
