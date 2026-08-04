@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Logo } from "@/components/logo"
 
@@ -20,12 +20,20 @@ function friendlyAuthError(message: string) {
   return message.replace(/supabase/gi, "LaunchLens").replace(/\s+/g, " ").trim()
 }
 
-export default function LoginPage() {
+function LoginPageInner() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
+
+  const searchParams = useSearchParams()
+
+  const safeNext = () => {
+    const next = searchParams.get("next")
+    if (next && next.startsWith("/") && !next.startsWith("//")) return next
+    return "/dashboard"
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,7 +52,7 @@ export default function LoginPage() {
       return
     }
 
-    router.push("/dashboard")
+    router.push(safeNext())
     router.refresh()
   }
 
@@ -129,5 +137,19 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen min-h-[100dvh] flex items-center justify-center text-zinc-500 text-[14px]">
+          Loading…
+        </div>
+      }
+    >
+      <LoginPageInner />
+    </Suspense>
   )
 }
