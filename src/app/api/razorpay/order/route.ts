@@ -1,39 +1,42 @@
 import { NextResponse } from "next/server"
-import Razorpay from "razorpay"
+import { createPaymentOrder } from "@/lib/payments"
 
-const razorpay = new Razorpay({
-  key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-})
-
+/**
+ * Legacy Early Bird order endpoint (INR / Razorpay).
+ * Prefer POST /api/payments/order for new clients.
+ * Kept for backward compatibility with existing validate flow.
+ */
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}))
-    const { idea, score, verdict, confidence } = body
+    const { idea, score, verdict, confidence, email } = body
 
-    const options = {
-      amount: 79900, // ₹799
-      currency: "INR",
-      receipt: `ll_eb_${Date.now()}`,
-      notes: {
-        product: "early_bird_2_validations",
-        idea: idea ? String(idea).slice(0, 200) : "",
-        score: score ?? "",
-        verdict: verdict ?? "",
-        confidence: confidence ?? "",
+    const result = await createPaymentOrder({
+      productId: "early_bird",
+      customerEmail: email ? String(email) : undefined,
+      ctx: {
+        country: "IN",
+        preferredCurrency: "INR",
+        preferredProvider: "razorpay",
       },
-    }
-
-    const order = await razorpay.orders.create(options)
+      metadata: {
+        idea: idea ? String(idea).slice(0, 200) : "",
+        score: score != null ? String(score) : "",
+        verdict: verdict != null ? String(verdict) : "",
+        confidence: confidence != null ? String(confidence) : "",
+      },
+    })
 
     return NextResponse.json({
-      orderId: order.id,
-      amount: order.amount,
-      currency: order.currency,
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      orderId: result.orderId,
+      amount: result.amount,
+      currency: result.currency,
+      key: result.client.key,
+      provider: result.provider,
     })
-  } catch (err: any) {
-    console.error(err)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Order failed"
+    console.error("[razorpay/order]", err)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
