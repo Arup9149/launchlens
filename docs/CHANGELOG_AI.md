@@ -4,35 +4,36 @@ Newest entries first.
 
 ---
 
-## 2026-08-04 — Deploy hardening (env + build)
+## 2026-08-04 — Waitlist confirmation email + logo tagline
 
 **Agent:** Grok (xAI) — Lead Software Architect  
-**Scope:** Production deploy blockers
+**Scope:** Waitlist email system + branding tagline
 
-### Root causes analyzed
+### Root cause
+Waitlist API only inserted into Supabase — **no email path existed**.
 
-1. **Environment (primary runtime blocker):** `@supabase/ssr` throws if URL/anon key missing when a client is created. Middleware previously always constructed a client → every request could fail on a misconfigured Vercel project.  
-2. **Code hygiene:** `.gitignore` used `.env*` which blocked committing `.env.example`. Nested `launchlens/.next` remains in git history as noise (now ignored for future).  
-3. **Build:** Current `main` **does compile** with `npm run build` / webpack **without** secrets after payment refactor (no module-level Razorpay init).  
+### Actions
+1. `src/lib/email/**` — provider interface, Resend adapter, retries, structured logs  
+2. Premium HTML + text waitlist welcome template  
+3. `POST /api/waitlist` sends email after insert; failures never block success; duplicate-safe  
+4. Logo tagline **Know before you build.** under wordmark (navbar, app shell, auth)  
+5. `.env.example` + DEPLOYMENT Resend guide  
 
-### Fixes
+### Application code
+- Added: email domain layer  
+- Modified: waitlist route, logo, navbar, app layout heights  
 
-- `src/lib/supabase/env.ts` + guarded client/server/middleware  
-- `.env.example` with full variable list  
-- `.gitignore` allows `.env.example`; ignores `/launchlens/`  
-- `engines.node >= 20`; tsconfig excludes dead `src/api` and `launchlens`  
-- `docs/DEPLOYMENT.md` updated  
+---
 
-### Verification
+## 2026-08-04 — Deploy hardening (env + build)
 
-- `npm run build` — success (Turbopack default)  
-- `npx next build --webpack` — success  
+Supabase env guards, `.env.example`, Node engines, tsconfig excludes.
 
 ---
 
 ## 2026-08-04 — Global payment abstraction
 
-Payment domain layer (Razorpay IN live, Stripe ROW stub), quote/order APIs, docs.
+Payment domain layer (Razorpay IN live, Stripe ROW stub).
 
 ---
 

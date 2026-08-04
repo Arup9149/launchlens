@@ -1,107 +1,115 @@
 # LaunchLens — Deployment
 
 **Last reviewed:** 2026-08-04  
-**App:** Next.js 16 App Router (`launchlens`)  
-**Node:** >= 20 (`package.json` engines)
+**App:** Next.js 16 App Router  
+**Node:** >= 20
 
 ---
 
-## 1. Prerequisites
+## 1. Environment variables
 
-- Node.js **20+**
-- npm (lockfile: `package-lock.json`)
-- Supabase project (URL + anon key)
-- Razorpay account for INR Early Bird (India)
-- Optional: OpenRouter API key (required on Vercel for Brain without Ollama)
-- Optional later: Stripe keys for international checkout
+See **`.env.example`** for the full template.
 
----
+### Core
 
-## 2. Environment variables
+| Variable | Required | Notes |
+|----------|----------|--------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Yes (data) | Public |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes (data) | Public |
+| `NEXT_PUBLIC_APP_URL` | Recommended | Production URL |
+| `OPENROUTER_API_KEY` | Prod Brain | No Ollama on Vercel |
+| `BRAIN_PROVIDER` | No | `auto` / `openrouter` / `ollama` |
+| `NEXT_PUBLIC_RAZORPAY_KEY_ID` | India pay | Public |
+| `RAZORPAY_KEY_SECRET` | India pay | Secret |
+| `NEXT_PUBLIC_STRIPE_*` / `STRIPE_*` | Later | Reserved |
 
-Template file: **`.env.example`** (copy to `.env.local` locally; set the same keys in Vercel).
+### Transactional email (waitlist confirmation)
 
-| Variable | Required for | Notes |
-|----------|--------------|--------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Auth, waitlist, validations, credits | Public |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Same | Public anon key |
-| `NEXT_PUBLIC_APP_URL` | Redirects / absolute links | e.g. `https://your-app.vercel.app` |
-| `BRAIN_PROVIDER` | Brain routing | `auto` \| `openrouter` \| `ollama` |
-| `OPENROUTER_API_KEY` | Cloud Brain on Vercel | Strongly recommended in production |
-| `OPENROUTER_MODEL` | Optional | Default `deepseek/deepseek-chat` |
-| `NEXT_PUBLIC_RAZORPAY_KEY_ID` | India checkout | Public |
-| `RAZORPAY_KEY_SECRET` | India order create | **Secret** |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Future international | Reserved |
-| `STRIPE_SECRET_KEY` | Future international | Reserved **secret** |
-| `NEXT_PUBLIC_SKIP_PAYMENT` | Local only | `"true"` skips pay gate |
+| Variable | Required | Notes |
+|----------|----------|--------|
+| `EMAIL_PROVIDER` | No | Default `resend` |
+| `EMAIL_FROM_NAME` | No | Default `LaunchLens` |
+| `EMAIL_FROM_ADDRESS` | Yes for email | Verified sender at provider |
+| `EMAIL_REPLY_TO` | No | Optional |
+| `RESEND_API_KEY` | Yes for Resend | [resend.com/api-keys](https://resend.com/api-keys) |
 
-**Build note:** `npm run build` succeeds **without** secrets. Middleware no longer crashes when Supabase env is absent (request pass-through). Runtime data features require Supabase vars in the host.
+**Behavior:** Waitlist **always** stores the email when Supabase succeeds. Confirmation email is best-effort: failures are logged and **never** return an error to the user.
 
-**Production minimum (working MVP on Vercel):**
-
-1. `NEXT_PUBLIC_SUPABASE_URL`  
-2. `NEXT_PUBLIC_SUPABASE_ANON_KEY`  
-3. `NEXT_PUBLIC_APP_URL`  
-4. `OPENROUTER_API_KEY` (unless a separate Brain worker exists)  
-5. `NEXT_PUBLIC_RAZORPAY_KEY_ID` + `RAZORPAY_KEY_SECRET` if charging in India  
+Production sender (when domain is verified): set  
+`EMAIL_FROM_NAME=LaunchLens` and `EMAIL_FROM_ADDRESS=team@launchlens.ai`  
+(do not hardcode in source).
 
 ---
 
-## 3. Local development
+## 2. Resend setup
+
+### Local development
+
+1. Create account at [resend.com](https://resend.com).  
+2. Create an API key → `RESEND_API_KEY`.  
+3. For testing without a domain, Resend allows:
+   ```bash
+   EMAIL_PROVIDER=resend
+   EMAIL_FROM_NAME=LaunchLens
+   EMAIL_FROM_ADDRESS=onboarding@resend.dev
+   RESEND_API_KEY=re_xxxxxxxx
+   ```
+   (Can only send **to** your own Resend account email until a domain is verified.)  
+4. Copy `.env.example` → `.env.local` and fill values.  
+5. `npm run dev` → submit waitlist form → check Resend dashboard **Emails** + inbox.
+
+### Vercel deployment
+
+1. Project → Settings → Environment Variables.  
+2. Add at least:
+   - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`  
+   - `RESEND_API_KEY`  
+   - `EMAIL_PROVIDER=resend`  
+   - `EMAIL_FROM_NAME=LaunchLens`  
+   - `EMAIL_FROM_ADDRESS=<verified sender>`  
+3. Redeploy after saving env vars.
+
+### Production sender migration (`team@launchlens.ai`)
+
+1. In Resend: **Domains** → add `launchlens.ai` → add DNS records (SPF/DKIM).  
+2. Wait until domain status is **Verified**.  
+3. Set on Vercel (Production):
+   ```bash
+   EMAIL_FROM_NAME=LaunchLens
+   EMAIL_FROM_ADDRESS=team@launchlens.ai
+   ```
+4. Redeploy. No code change required.
+
+### Switching providers later
+
+Implement `EmailProvider` in `src/lib/email/providers/`, register in `registry.ts`, set `EMAIL_PROVIDER=postmark|sendgrid` and the matching API key env. Waitlist route stays unchanged.
+
+---
+
+## 3. Local / build
 
 ```bash
 cp .env.example .env.local
-# fill values
 npm install
+npm run build   # must succeed before deploy
 npm run dev
 ```
 
-```bash
-npm run build   # must succeed before merge / deploy
-npm run start
-```
+---
+
+## 4. Vercel notes
+
+- Root directory = repo root (not nested `launchlens/`).  
+- Node 20+.  
+- Build: `npm run build`.  
+- Middleware passes through if Supabase env is missing.
 
 ---
 
-## 4. Vercel
+## 5. Smoke checklist
 
-1. Import `Arup9149/launchlens` (root of repo — not nested `launchlens/`).  
-2. Framework: Next.js (auto).  
-3. Build command: `npm run build`.  
-4. Set env vars from the table above (Production + Preview as needed).  
-5. Deploy.  
-
-Do **not** rely on committed `launchlens/.next` artifacts; Vercel builds from source.
-
----
-
-## 5. Brain modes on Vercel
-
-| Mode | Setup |
-|------|--------|
-| Cloud | `OPENROUTER_API_KEY` + `BRAIN_PROVIDER=auto` or `openrouter` |
-| Local Ollama | Not available on Vercel serverless — use OpenRouter |
-
-`/api/architecture` and `/api/related` are still Ollama-only in code (P1) — prefer OpenRouter-capable routes or complete provider parity before relying on those tools in production.
-
----
-
-## 6. Smoke checklist
-
-- [ ] `npm run build` green locally  
-- [ ] `/` loads  
-- [ ] `GET /api/brain/health` shows expected engine  
-- [ ] Auth signup/login with Supabase  
-- [ ] Waitlist / validate with keys set  
-- [ ] Razorpay order in test mode (India keys)  
-
----
-
-## 7. Common deploy blockers
-
-| Symptom | Cause | Fix |
-|---------|--------|-----|
-| Auth/middleware errors | Missing Supabase public env | Set `NEXT_PUBLIC_SUPABASE_*` |
-| Order 500 / not configured | Missing Razorpay secrets | Set Razorpay pair |
-| International order 503 | Stripe stub | Expected until Stripe adapter ships |
-| Brain offline on Vercel | No OpenRouter key | Set `OPENROUTER_API_KEY` |
+- [ ] `npm run build`  
+- [ ] Landing + tagline under logo  
+- [ ] Waitlist insert succeeds  
+- [ ] Resend shows delivered welcome email  
+- [ ] `GET /api/brain/health`  
