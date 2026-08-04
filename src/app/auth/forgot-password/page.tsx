@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6">
+    <div className="min-h-screen min-h-[100dvh] flex items-center justify-center px-6 py-10 safe-px safe-pb">
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
           <Logo href="/" size="md" />
@@ -50,13 +50,13 @@ export default function ForgotPasswordPage() {
             Reset your password
           </h1>
           <p className="text-[14px] text-zinc-500 mb-8 text-center sm:text-left leading-relaxed">
-            We&apos;ll help you get back into LaunchLens.
+            We'll help you get back into LaunchLens.
           </p>
 
           {sent ? (
             <div className="space-y-6">
               <p className="text-[14px] text-emerald-400 leading-relaxed" role="status">
-                If an account exists for that email, you&apos;ll receive a reset
+                If an account exists for that email, you'll receive a reset
                 link shortly. Check your inbox and spam folder.
               </p>
               <Link
