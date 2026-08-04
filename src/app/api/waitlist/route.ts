@@ -59,45 +59,57 @@ export async function POST(request: Request) {
       }
     }
 
-    // Confirmation email — failures are logged, never fail the join
+    // Confirmation email — new joins only; failures logged, never fail the join
     let emailSent = false
     let emailSkipped = false
-    try {
-      const rendered = renderWaitlistWelcome({ email, name })
-      await sendEmail({
-        to: email,
-        subject: rendered.subject,
-        html: rendered.html,
-        text: rendered.text,
-        idempotencyKey: `waitlist-welcome:${email}`,
-        tags: {
-          category: "waitlist_welcome",
-        },
-      })
-      emailSent = true
-    } catch (err) {
-      const code =
-        err instanceof Error && "code" in err
-          ? String((err as { code?: string }).code)
-          : undefined
-      if (code === "EMAIL_NOT_CONFIGURED") {
-        emailSkipped = true
-        console.warn(
-          JSON.stringify({
-            level: "warn",
-            msg: "waitlist.email_skipped_not_configured",
-            email,
-          })
-        )
-      } else {
-        console.error(
-          JSON.stringify({
-            level: "error",
-            msg: "waitlist.email_failed",
-            email,
-            error: err instanceof Error ? err.message : String(err),
-          })
-        )
+    if (alreadyOnList) {
+      emailSkipped = true
+      console.info(
+        JSON.stringify({
+          level: "info",
+          msg: "waitlist.email_skipped_duplicate",
+          email,
+        })
+      )
+    } else {
+      try {
+        const rendered = renderWaitlistWelcome({ email, name })
+        await sendEmail({
+          to: email,
+          subject: rendered.subject,
+          html: rendered.html,
+          text: rendered.text,
+          idempotencyKey: `waitlist-welcome:${email}`,
+          tags: {
+            category: "waitlist_welcome",
+          },
+        })
+        emailSent = true
+      } catch (err) {
+        const code =
+          err instanceof Error && "code" in err
+            ? String((err as { code?: string }).code)
+            : undefined
+        if (code === "EMAIL_NOT_CONFIGURED") {
+          emailSkipped = true
+          console.warn(
+            JSON.stringify({
+              level: "warn",
+              msg: "waitlist.email_skipped_not_configured",
+              email,
+              hint: "Set RESEND_API_KEY (and optional EMAIL_FROM_* overrides). MVP From defaults to LaunchLens <onboarding@resend.dev>.",
+            })
+          )
+        } else {
+          console.error(
+            JSON.stringify({
+              level: "error",
+              msg: "waitlist.email_failed",
+              email,
+              error: err instanceof Error ? err.message : String(err),
+            })
+          )
+        }
       }
     }
 

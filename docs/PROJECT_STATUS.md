@@ -1,24 +1,22 @@
 # LaunchLens — Project Status
 
-**Last status update:** 2026-08-04 (Launch Readiness — Authentication UX)  
+**Last status update:** 2026-08-04 (Launch Readiness — MVP Email Branding)  
 **Branch:** `main`  
-**Status:** Auth entry path complete (Start Free → Signup, Sign In, protected routes); ops still required for P0 SQL/secrets before open monetization
+**Status:** Transactional email sender standardized for MVP (Resend onboarding@resend.dev); ops still required for P0 SQL/secrets before open monetization
 
-### This sprint (Authentication UX)
+### This sprint (MVP Email Branding)
 
-- Navbar: **Sign In** + **Start Free** → `/auth/signup`
-- Landing primary CTAs: **Start Free** → existing signup flow
-- Middleware: unauthenticated access to Dashboard / Validate / Workshop / Guides → `/auth/login?next=…`
-- Signed-in users hitting login/signup → Dashboard (or safe `next`)
-- Login honors `next` after success
-- App shell: **Sign out** (POST `/auth/signout`)
-- Existing signup, login, forgot-password, verify-email reused (no redesign)
+- Defaults: `EMAIL_PROVIDER=resend`, `EMAIL_FROM_NAME=LaunchLens`, `EMAIL_FROM_ADDRESS=onboarding@resend.dev`
+- Environment overrides still respected
+- Waitlist welcome: send only on new insert; skip on duplicate; clearer skip logs when `RESEND_API_KEY` missing
+- All app emails go through `sendEmail` → `formatFromHeader` (no hardcoded From)
+- Supabase Auth emails unchanged
 
 ### Still open (ops / P0 leftovers)
 
 - Apply `docs/migrations/001_p0_security.sql` in Supabase
-- Live webhook + service role on Vercel (`SUPABASE_SERVICE_ROLE_KEY`, `RAZORPAY_WEBHOOK_SECRET`)
+- Live webhook + service role on Vercel
+- Set `RESEND_API_KEY` (+ optional From overrides) on Vercel for waitlist mail
 - Point Razorpay webhook URL to production
-- Stripe checkout (stub)
 
 See `docs/LAUNCH_CHECKLIST.md` and `docs/NEXT_TASKS.md`.

@@ -10,21 +10,30 @@ export type EmailConfig = {
   sendgridApiKey?: string
 }
 
+/** Resend’s shared verified sender for MVP (no custom domain required). */
+export const MVP_RESEND_FROM_ADDRESS = "onboarding@resend.dev"
+
 /**
  * All sender identity comes from environment variables.
- * Production target (after domain verify): EMAIL_FROM_NAME=LaunchLens,
- * EMAIL_FROM_ADDRESS=team@launchlens.ai — never hardcode the address in source.
+ * Defaults (MVP): EMAIL_PROVIDER=resend, EMAIL_FROM_NAME=LaunchLens,
+ * EMAIL_FROM_ADDRESS=onboarding@resend.dev.
+ * Production override after domain verify: EMAIL_FROM_ADDRESS=team@launchlens.ai
+ * — never hardcode a production-only address in call sites.
  */
 export function getEmailConfig(): EmailConfig {
   const provider = (
     process.env.EMAIL_PROVIDER || "resend"
   ).toLowerCase() as EmailProviderId
 
+  const fromAddress = (
+    process.env.EMAIL_FROM_ADDRESS || MVP_RESEND_FROM_ADDRESS
+  ).trim()
+
   return {
     provider:
       provider === "postmark" || provider === "sendgrid" ? provider : "resend",
     fromName: (process.env.EMAIL_FROM_NAME || "LaunchLens").trim(),
-    fromAddress: (process.env.EMAIL_FROM_ADDRESS || "").trim(),
+    fromAddress,
     replyTo: process.env.EMAIL_REPLY_TO?.trim() || undefined,
     resendApiKey: process.env.RESEND_API_KEY,
     postmarkServerToken: process.env.POSTMARK_SERVER_TOKEN,
@@ -37,13 +46,13 @@ export function formatFromHeader(cfg: EmailConfig): string {
   const address = cfg.fromAddress
   if (!address) {
     throw new Error(
-      "EMAIL_FROM_ADDRESS is not set. Configure a verified sender (see .env.example). Production target: team@launchlens.ai after DNS verify."
+      "EMAIL_FROM_ADDRESS resolved empty. Set EMAIL_FROM_ADDRESS or rely on the MVP default onboarding@resend.dev."
     )
   }
   return name ? `${name} <${address}>` : address
 }
 
-/** True when From can be assembled for outbound mail. */
+/** True when From can be assembled and the active provider has credentials. */
 export function isEmailSenderConfigured(): boolean {
   const cfg = getEmailConfig()
   if (!cfg.fromAddress) return false
