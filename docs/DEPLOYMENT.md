@@ -4,6 +4,8 @@
 **App:** Next.js 16 App Router  
 **Node:** >= 20
 
+See also: **`docs/LAUNCH_CHECKLIST.md`** for pre-launch smoke steps.
+
 ---
 
 ## 1. Environment variables
@@ -35,9 +37,9 @@ See **`.env.example`** for the full template.
 
 **Behavior:** Waitlist **always** stores the email when Supabase succeeds. Confirmation email is best-effort: failures are logged and **never** return an error to the user.
 
-Production sender (when domain is verified): set  
-`EMAIL_FROM_NAME=LaunchLens` and `EMAIL_FROM_ADDRESS=team@launchlens.ai`  
-(do not hardcode in source).
+**Sender identity:** 100% from env. Production target after DNS verify:
+`EMAIL_FROM_NAME=LaunchLens` + `EMAIL_FROM_ADDRESS=team@launchlens.ai`  
+(no code change; DNS is an ops step outside this sprint).
 
 ---
 
@@ -47,51 +49,34 @@ Production sender (when domain is verified): set
 
 1. Create account at [resend.com](https://resend.com).  
 2. Create an API key → `RESEND_API_KEY`.  
-3. For testing without a domain, Resend allows:
+3. For testing without a domain:
    ```bash
    EMAIL_PROVIDER=resend
    EMAIL_FROM_NAME=LaunchLens
    EMAIL_FROM_ADDRESS=onboarding@resend.dev
    RESEND_API_KEY=re_xxxxxxxx
    ```
-   (Can only send **to** your own Resend account email until a domain is verified.)  
 4. Copy `.env.example` → `.env.local` and fill values.  
-5. `npm run dev` → submit waitlist form → check Resend dashboard **Emails** + inbox.
+5. `npm run dev` → submit waitlist form → check Resend **Emails** + inbox.
 
-### Vercel deployment
+### Vercel
 
-1. Project → Settings → Environment Variables.  
-2. Add at least:
-   - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`  
-   - `RESEND_API_KEY`  
-   - `EMAIL_PROVIDER=resend`  
-   - `EMAIL_FROM_NAME=LaunchLens`  
-   - `EMAIL_FROM_ADDRESS=<verified sender>`  
-3. Redeploy after saving env vars.
+Set the same email vars → redeploy after changes to `NEXT_PUBLIC_*`.
 
-### Production sender migration (`team@launchlens.ai`)
+### Production sender (`team@launchlens.ai`) — ops later
 
-1. In Resend: **Domains** → add `launchlens.ai` → add DNS records (SPF/DKIM).  
-2. Wait until domain status is **Verified**.  
-3. Set on Vercel (Production):
-   ```bash
-   EMAIL_FROM_NAME=LaunchLens
-   EMAIL_FROM_ADDRESS=team@launchlens.ai
-   ```
-4. Redeploy. No code change required.
-
-### Switching providers later
-
-Implement `EmailProvider` in `src/lib/email/providers/`, register in `registry.ts`, set `EMAIL_PROVIDER=postmark|sendgrid` and the matching API key env. Waitlist route stays unchanged.
+1. Verify `launchlens.ai` in Resend (SPF/DKIM).  
+2. Set `EMAIL_FROM_ADDRESS=team@launchlens.ai` on Vercel.  
+3. Redeploy. No application code change.
 
 ---
 
-## 3. Local / build
+## 3. Build
 
 ```bash
 cp .env.example .env.local
 npm install
-npm run build   # must succeed before deploy
+npm run build
 npm run dev
 ```
 
@@ -101,15 +86,10 @@ npm run dev
 
 - Root directory = repo root (not nested `launchlens/`).  
 - Node 20+.  
-- Build: `npm run build`.  
-- Middleware passes through if Supabase env is missing.
+- Build: `npm run build`.
 
 ---
 
-## 5. Smoke checklist
+## Launch checklist
 
-- [ ] `npm run build`  
-- [ ] Landing + tagline under logo  
-- [ ] Waitlist insert succeeds  
-- [ ] Resend shows delivered welcome email  
-- [ ] `GET /api/brain/health`  
+See **`docs/LAUNCH_CHECKLIST.md`** for the full pre-launch checklist.

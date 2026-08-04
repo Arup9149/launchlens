@@ -56,6 +56,8 @@ Prioritized backlog. Last updated 2026-08-04.
 
 | ID | Task |
 |----|------|
+| — | Sprint A: waitlist + validate founder messaging |
+| — | Sprint B: email design system + LAUNCH_CHECKLIST |
 | — | Waitlist welcome email (Resend + abstraction) |
 | — | Logo tagline “Know before you build.” |
 | — | Payment provider interface + quote/order APIs |
