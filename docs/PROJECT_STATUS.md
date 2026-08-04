@@ -1,15 +1,15 @@
 # LaunchLens — Project Status
 
-**Last status update:** 2026-08-04 (Launch Readiness Sprint 2 — responsive QA complete)  
+**Last status update:** 2026-08-04 (P0 Security Sprint)  
 **Branch:** `main`  
-**Status:** MVP surface ready for limited Early Access; **not** yet safe for open public monetization at scale
+**Status:** Early Access possible after Supabase migration + env; **public monetization** still gated on live webhook verification in production
 
-### Sprint 2 notes
+### P0 Security notes
 
-- SEO: metadata, robots, sitemap  
-- Responsive: safe-area on all primary surfaces, touch targets ≥44px, 404, auth dvh shells  
-- A11y: skip link, focus-visible, nav labels  
-- Perf: font swap, compress, reduced-motion  
-- **Launch blockers remain:** payment webhook, RLS, Stripe live  
+- Razorpay webhook + payment verify → server-side idempotent credit grant  
+- Client `action=grant` **forbidden**  
+- Credits + validations scoped to `auth.uid()`  
+- RLS SQL shipped in `docs/migrations/001_p0_security.sql` (must be applied in Supabase)  
+- Stripe still stub  
 
-See `docs/LAUNCH_CHECKLIST.md` §6 for blocker table.
+See `docs/LAUNCH_CHECKLIST.md` and `docs/DATABASE.md`.
