@@ -1,6 +1,6 @@
 # LaunchLens — Feature Inventory
 
-**Last updated:** 2026-08-04 (Launch Readiness — Authentication UX)
+**Last updated:** 2026-08-04 (Launch Readiness — MVP Email Branding)
 
 ### Platform
 
@@ -38,3 +38,5 @@
 | Credits / validations by `auth.uid()` | **Done** |
 | RLS SQL | **Shipped** — apply in Supabase |
 | Stripe live checkout | **Stub** |
+| Transactional From (MVP Resend) | **Done** (`onboarding@resend.dev`) |
+| Waitlist welcome email | **Done** (requires RESEND_API_KEY on host) |

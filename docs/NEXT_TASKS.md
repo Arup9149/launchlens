@@ -1,6 +1,6 @@
 # LaunchLens — Next Tasks
 
-Prioritized backlog. Last updated 2026-08-04 (Launch Readiness — Authentication UX).
+Prioritized backlog. Last updated 2026-08-04 (Launch Readiness — MVP Email Branding).
 
 ---
 
@@ -13,7 +13,8 @@ Prioritized backlog. Last updated 2026-08-04 (Launch Readiness — Authenticatio
 | P0-3 | Fix or remove `/api/razorpay/guide` | Open |
 | P0-4 | Rate-limit LLM routes | Open |
 | P0-5 | Stripe PaymentIntent + webhook | Open |
-| P0-auth | Auth entry UX + protected product routes | **Done** (this sprint) |
+| P0-auth | Auth entry UX + protected product routes | **Done** |
+| P0-email | MVP email From + waitlist delivery path | **Done** |
 
 ---
 
@@ -34,6 +35,7 @@ Prioritized backlog. Last updated 2026-08-04 (Launch Readiness — Authenticatio
 |------|--------|
 | Run `docs/migrations/001_p0_security.sql` | Supabase |
 | Set service role + webhook secret | Vercel |
+| Set `RESEND_API_KEY` on Vercel | Required for waitlist mail |
 | Point Razorpay webhook URL | Production domain |
 
 ---
@@ -42,6 +44,7 @@ Prioritized backlog. Last updated 2026-08-04 (Launch Readiness — Authenticatio
 
 | Task |
 |------|
+| MVP Email Branding: From LaunchLens <onboarding@resend.dev>, waitlist delivery path |
 | Auth UX: Start Free → signup, Sign In, protected routes, sign out, next redirect |
 | Launch Readiness founder messaging / playbook docs |
 | Early Founder onboarding, Founder Validations copy, upgrade panel |
