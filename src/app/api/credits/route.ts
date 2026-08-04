@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { useCreditForUser } from "@/lib/credits/server"
+import { ensureFounderCreditsRow } from "@/lib/credits/ensure-founder"
 
 /**
  * Credits are scoped to auth.uid().
- * - GET: current user's balance
+ * - GET: current balance; auto-allocates Early Founder starter validations if missing
  * - POST action=use: consume 1 credit (authenticated)
  * - POST action=grant is NOT available on this public API (webhook / verify only)
  */
@@ -19,24 +20,21 @@ export async function GET() {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 })
     }
 
-    const { data, error } = await supabase
-      .from("founder_credits")
-      .select("credits, plan, email")
-      .eq("user_id", user.id)
-      .maybeSingle()
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
+    const row = await ensureFounderCreditsRow(supabase, user)
 
     return NextResponse.json({
-      email: data?.email ?? user.email ?? null,
-      credits: data?.credits ?? 0,
-      plan: data?.plan ?? null,
+      email: row.email,
+      credits: row.credits,
+      plan: row.plan,
       userId: user.id,
+      bootstrapped: row.bootstrapped,
     })
-  } catch {
-    return NextResponse.json({ error: "Failed" }, { status: 500 })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed"
+    console.error(
+      JSON.stringify({ level: "error", msg: "credits.get_failed", error: message })
+    )
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -54,7 +52,6 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}))
     const action = body.action as string
 
-    // Hard block: clients cannot grant credits
     if (action === "grant") {
       return NextResponse.json(
         {
@@ -69,6 +66,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid action" }, { status: 400 })
     }
 
+    // Ensure row exists before consume (new founder with 3 can use immediately)
+    await ensureFounderCreditsRow(supabase, user)
+
     try {
       const result = await useCreditForUser(supabase, user.id)
       return NextResponse.json({ credits: result.credits, plan: result.plan })
@@ -82,7 +82,8 @@ export async function POST(request: Request) {
       }
       throw err
     }
-  } catch {
-    return NextResponse.json({ error: "Failed" }, { status: 500 })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed"
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

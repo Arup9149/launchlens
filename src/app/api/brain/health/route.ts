@@ -8,10 +8,10 @@ export async function GET() {
   try {
     const selection = selectBrainEngine()
 
-    // Never probe Ollama on serverless / when OpenRouter is the selected engine
     if (selection.engine === "openrouter") {
       return NextResponse.json({
         online: true,
+        ok: true, // legacy alias used by older clients
         engine: "openrouter",
         endpoint: selection.endpoint,
         reason: selection.reason,
@@ -19,7 +19,6 @@ export async function GET() {
       })
     }
 
-    // Explicit local Ollama path only
     try {
       const res = await fetch("http://127.0.0.1:11434/api/tags", {
         signal: AbortSignal.timeout(2000),
@@ -27,19 +26,19 @@ export async function GET() {
       if (!res.ok) {
         return NextResponse.json({
           online: false,
+          ok: false,
           engine: "none",
           message: "Ollama is offline. Run: ollama serve",
         })
       }
-      const data = (await res.json()) as {
-        models?: { name?: string }[]
-      }
+      const data = (await res.json()) as { models?: { name?: string }[] }
       const hasQwen = (data.models || []).some((m) =>
         String(m.name || "").includes("qwen")
       )
       return NextResponse.json({
         online: true,
-        engine: hasQwen ? "ollama" : "ollama",
+        ok: true,
+        engine: "ollama",
         message: hasQwen
           ? "Brain online · Ollama (qwen)"
           : "Brain online · Ollama",
@@ -47,13 +46,16 @@ export async function GET() {
     } catch {
       return NextResponse.json({
         online: false,
+        ok: false,
         engine: "none",
         message: "Ollama is offline. Run: ollama serve",
       })
     }
   } catch (err: any) {
+    const online = hasOR
     return NextResponse.json({
-      online: hasOR,
+      online,
+      ok: online,
       engine: hasOR ? "openrouter" : "none",
       message: hasOR
         ? "Brain online · OpenRouter"
