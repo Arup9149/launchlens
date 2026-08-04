@@ -13,7 +13,7 @@ export default function AppLayout({
           <Logo href="/dashboard" size="md" />
 
           <nav
-            className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto max-w-[60%] sm:max-w-none scrollbar-none"
+            className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto max-w-[70%] sm:max-w-none scrollbar-none"
             aria-label="Workspace"
           >
             <Link
@@ -40,6 +40,14 @@ export default function AppLayout({
             >
               Home
             </Link>
+            <form action="/auth/signout" method="post" className="inline-flex">
+              <button
+                type="submit"
+                className="text-[12px] sm:text-[13px] text-zinc-500 hover:text-zinc-300 px-2.5 sm:px-3 py-2 rounded-full hover:bg-white/5 transition whitespace-nowrap min-h-11 inline-flex items-center"
+              >
+                Sign out
+              </button>
+            </form>
           </nav>
         </div>
       </header>

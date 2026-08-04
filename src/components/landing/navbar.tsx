@@ -24,11 +24,16 @@ export function Navbar() {
             Workshop
           </Link>
           <Link
-            href="/validate"
+            href="/auth/login"
+            className="text-[13px] text-zinc-300 hover:text-white px-3 py-2 rounded-full hover:bg-white/5 transition min-h-11 inline-flex items-center"
+          >
+            Sign In
+          </Link>
+          <Link
+            href="/auth/signup"
             className="text-[12px] sm:text-[13px] font-medium px-3.5 sm:px-4 py-2.5 rounded-full bg-violet-600 hover:bg-violet-500 text-white transition min-h-11 inline-flex items-center"
           >
-            <span className="sm:hidden">Start Free</span>
-            <span className="hidden sm:inline">Start Free</span>
+            Start Free
           </Link>
         </nav>
       </div>

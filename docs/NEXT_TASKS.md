@@ -1,6 +1,6 @@
 # LaunchLens — Next Tasks
 
-Prioritized backlog. Last updated 2026-08-04 (Launch Readiness — Founder Experience Refinement).
+Prioritized backlog. Last updated 2026-08-04 (Launch Readiness — Authentication UX).
 
 ---
 
@@ -13,6 +13,7 @@ Prioritized backlog. Last updated 2026-08-04 (Launch Readiness — Founder Exper
 | P0-3 | Fix or remove `/api/razorpay/guide` | Open |
 | P0-4 | Rate-limit LLM routes | Open |
 | P0-5 | Stripe PaymentIntent + webhook | Open |
+| P0-auth | Auth entry UX + protected product routes | **Done** (this sprint) |
 
 ---
 
@@ -23,7 +24,7 @@ Prioritized backlog. Last updated 2026-08-04 (Launch Readiness — Founder Exper
 | P1-0 | Point validate + landing at `/api/payments/quote` | Open |
 | P1-1 | Unify Brain provider for architecture + related | Open |
 | P1-2 | Server-side guide entitlement | Open |
-| P1-4 | Gate `(app)` routes or document public access | Open |
+| P1-4 | Gate `(app)` routes or document public access | **Done** (middleware guards) |
 
 ---
 
@@ -41,7 +42,8 @@ Prioritized backlog. Last updated 2026-08-04 (Launch Readiness — Founder Exper
 
 | Task |
 |------|
-| Launch Readiness: landing free CTAs, gated ₹799, personalized playbook + 20-day PDFs, onboarding copy |
-| Early Founder onboarding, Founder Validations copy, upgrade panel, result completion |
+| Auth UX: Start Free → signup, Sign In, protected routes, sign out, next redirect |
+| Launch Readiness founder messaging / playbook docs |
+| Early Founder onboarding, Founder Validations copy, upgrade panel |
 | P0 Security code path |
 | Sprint 2 responsive / SEO / a11y |

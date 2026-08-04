@@ -1,17 +1,18 @@
 # LaunchLens — Project Status
 
-**Last status update:** 2026-08-04 (Launch Readiness — Founder Experience Refinement)  
+**Last status update:** 2026-08-04 (Launch Readiness — Authentication UX)  
 **Branch:** `main`  
-**Status:** Founder messaging standardized; personalized playbooks; pricing gated until validations exhausted; ops still required for P0 SQL/secrets before open monetization
+**Status:** Auth entry path complete (Start Free → Signup, Sign In, protected routes); ops still required for P0 SQL/secrets before open monetization
 
-### This sprint (Founder Experience Refinement)
+### This sprint (Authentication UX)
 
-- Landing: Start Free / Join Founder Cohort — no ₹799 payment CTA before value
-- Standardized benefits: 3 Founder Validations, Personalized Founder Playbook, Personalized 20-Day Builder Program, AI Workshop, Early Founder Cohort
-- Validate: ₹799 / Become an Early Founder only when Founder Validations remaining = 0
-- Result: completion message + **Download Founder Playbook** + **Download 20-Day Builder Program** (print-ready personalized HTML → Save as PDF)
-- Dashboard: same personalized downloads (uses latest validation)
-- Onboarding benefits list aligned with cohort package
+- Navbar: **Sign In** + **Start Free** → `/auth/signup`
+- Landing primary CTAs: **Start Free** → existing signup flow
+- Middleware: unauthenticated access to Dashboard / Validate / Workshop / Guides → `/auth/login?next=…`
+- Signed-in users hitting login/signup → Dashboard (or safe `next`)
+- Login honors `next` after success
+- App shell: **Sign out** (POST `/auth/signout`)
+- Existing signup, login, forgot-password, verify-email reused (no redesign)
 
 ### Still open (ops / P0 leftovers)
 
