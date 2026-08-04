@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { OnboardingModal } from "@/components/founder/onboarding-modal"
+import { UpgradePanel } from "@/components/founder/upgrade-panel"
+import { founderValidationsLabel } from "@/lib/founder-copy"
 
 type Validation = {
   id: string
@@ -94,7 +97,8 @@ export default function DashboardPage() {
   ]
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-16">
+    <div className="max-w-6xl mx-auto safe-px py-16">
+      <OnboardingModal />
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
@@ -112,23 +116,28 @@ export default function DashboardPage() {
             )}
           </div>
           <p className="text-[15px] text-zinc-500">
-            Your idea validation and build workspace
+            Your Early Founder workspace
           </p>
         </div>
         <Link
           href="/validate"
           className="bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-400 hover:to-violet-500 text-[14px] font-medium px-6 py-2.5 rounded-full text-white transition text-center"
         >
-          + New validation
+          + New Founder Validation
         </Link>
       </div>
 
-      {/* Credits panel */}
+      {credits === 0 && (
+        <div className="mb-10">
+          <UpgradePanel />
+        </div>
+      )}
+
       <div className="glass-strong rounded-2xl p-5 mb-10 border border-violet-500/20">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p className="text-[12px] uppercase tracking-[0.15em] text-violet-400 mb-1">
-              Validation credits
+              Founder Validations
             </p>
             <p className="text-[28px] font-medium tracking-tight">
               {credits === null ? "—" : credits}
@@ -137,11 +146,14 @@ export default function DashboardPage() {
               </span>
             </p>
             <p className="text-[12px] text-zinc-500 mt-1">
+              {credits === null
+                ? "Sign in to load your Founder Validations"
+                : founderValidationsLabel(credits)}
               {plan === "early_bird"
-                ? "Early Bird plan · 2 validations pack"
+                ? " · Early Founder cohort"
                 : plan
-                ? `Plan: ${plan}`
-                : "Sign in to load your credits"}
+                  ? ` · ${plan}`
+                  : ""}
             </p>
             {creditMsg && (
               <p className="text-[12px] text-emerald-400 mt-1">{creditMsg}</p>
@@ -153,7 +165,7 @@ export default function DashboardPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@email.com"
-              className="bg-white/[0.03] border border-white/[0.08] rounded-full px-4 py-2 text-[13px] text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500/40 min-w-[220px]"
+              className="bg-white/[0.03] border border-white/10 rounded-full px-4 py-2 text-[13px] text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500/40 min-w-[220px]"
             />
             <button
               onClick={() => {
@@ -161,7 +173,7 @@ export default function DashboardPage() {
                   setCreditMsg("Enter a valid email")
                   return
                 }
-                setCreditMsg("Credits refreshed")
+                setCreditMsg("Founder Validations refreshed")
                 setEmail(email.trim().toLowerCase())
               }}
               className="text-[13px] px-4 py-2 rounded-full border border-white/10 text-zinc-300 hover:bg-white/5"
@@ -186,6 +198,37 @@ export default function DashboardPage() {
             <p className="text-[12px] text-violet-400">{t.cta} →</p>
           </Link>
         ))}
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-3 mb-12">
+        <a
+          href="/founder/launchlens-founder-playbook.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="glass rounded-2xl p-5 hover:bg-white/[0.04] transition block"
+        >
+          <p className="text-[12px] uppercase tracking-[0.14em] text-violet-400 mb-1">
+            Founder resource
+          </p>
+          <h3 className="text-[14px] font-medium mb-1.5">Founder Playbook</h3>
+          <p className="text-[12px] text-zinc-500 leading-relaxed">
+            A practical handbook on validation, pricing, MVP, and founder systems.
+          </p>
+        </a>
+        <a
+          href="/founder/launch-in-20-days.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="glass rounded-2xl p-5 hover:bg-white/[0.04] transition block"
+        >
+          <p className="text-[12px] uppercase tracking-[0.14em] text-violet-400 mb-1">
+            Builder program
+          </p>
+          <h3 className="text-[14px] font-medium mb-1.5">Launch in 20 Days</h3>
+          <p className="text-[12px] text-zinc-500 leading-relaxed">
+            A guided execution workbook from idea to launch-ready MVP.
+          </p>
+        </a>
       </div>
 
       <div className="mb-4 flex items-center justify-between">
