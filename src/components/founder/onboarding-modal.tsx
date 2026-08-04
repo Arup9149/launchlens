@@ -60,14 +60,14 @@ export function OnboardingModal() {
           id="onboarding-title"
           className="text-2xl sm:text-3xl font-medium tracking-tight text-center mb-2"
         >
-          Welcome to LaunchLens
+          🎉 Welcome to LaunchLens
         </h2>
         <p className="text-[14px] text-zinc-500 text-center mb-6">
           Know before you build.
         </p>
 
         <p className="text-[15px] text-zinc-300 leading-relaxed mb-5 text-center sm:text-left">
-          You&apos;ve been selected for the LaunchLens Early Founder Cohort — an
+          You've been selected for the LaunchLens Early Founder Cohort — an
           invitation-only group helping shape the product before public launch.
         </p>
 
