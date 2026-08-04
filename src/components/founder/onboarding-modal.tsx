@@ -67,19 +67,19 @@ export function OnboardingModal() {
         </p>
 
         <p className="text-[15px] text-zinc-300 leading-relaxed mb-5 text-center sm:text-left">
-          You've been selected for the LaunchLens Early Founder Cohort — an
-          invitation-only group helping shape the product before public launch.
+          Welcome to the LaunchLens Early Founder Cohort.
         </p>
 
-        <p className="text-[13px] text-zinc-500 mb-3">As an Early Founder you receive:</p>
+        <p className="text-[13px] text-zinc-500 mb-3">
+          As an Early Founder you receive:
+        </p>
         <ul className="space-y-2 mb-8 text-[14px] text-zinc-300">
           {[
             "3 Founder Validations",
-            "Full AI Workshop",
-            "Polish Garage",
-            "AI Brain",
-            "Priority product updates",
-            "Direct influence on the roadmap",
+            "AI Workshop",
+            "Personalized Founder Playbook",
+            "Personalized 20-Day Builder Program",
+            "Direct product influence",
           ].map((item) => (
             <li key={item} className="flex items-start gap-2.5">
               <span className="text-emerald-400 mt-0.5 shrink-0" aria-hidden>
