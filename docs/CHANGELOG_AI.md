@@ -1,78 +1,47 @@
 # LaunchLens — AI Changelog
 
-Record of AI/agent-assisted work on this repository.  
 Newest entries first.
 
 ---
 
-## 2026-08-04 — Global payment abstraction (Razorpay IN + Stripe ROW)
+## 2026-08-04 — Deploy hardening (env + build)
 
 **Agent:** Grok (xAI) — Lead Software Architect  
-**Scope:** Payment domain layer + APIs + docs (Stripe charge path not implemented)
+**Scope:** Production deploy blockers
 
-### Actions
+### Root causes analyzed
 
-1. Added `src/lib/payments/`:
-   - `types.ts` — `PaymentProvider`, quotes, orders  
-   - `catalog.ts` — Early Bird / plans in INR·USD·EUR·GBP minor units  
-   - `region.ts` — country → currency + provider (IN→Razorpay, else→Stripe)  
-   - `providers/razorpay.ts` — live adapter  
-   - `providers/stripe.ts` — registered stub (`PROVIDER_NOT_CONFIGURED` / `NOT_IMPLEMENTED`)  
-   - `providers/registry.ts` — extensible registry  
-   - `index.ts` — `getQuote()`, `createPaymentOrder()`  
-2. Added `GET /api/payments/quote` and `POST /api/payments/order`.  
-3. Refactored `POST /api/razorpay/order` to call `createPaymentOrder` (INR forced).  
-4. Documented strategy in ARCHITECTURE, API_REFERENCE, ROADMAP, PROJECT_STATUS.
+1. **Environment (primary runtime blocker):** `@supabase/ssr` throws if URL/anon key missing when a client is created. Middleware previously always constructed a client → every request could fail on a misconfigured Vercel project.  
+2. **Code hygiene:** `.gitignore` used `.env*` which blocked committing `.env.example`. Nested `launchlens/.next` remains in git history as noise (now ignored for future).  
+3. **Build:** Current `main` **does compile** with `npm run build` / webpack **without** secrets after payment refactor (no module-level Razorpay init).  
 
-### Application code
+### Fixes
 
-- **Added:** payment domain + payments API routes  
-- **Modified:** legacy Razorpay order route (behavior preserved for IN)  
-- **Not done:** Stripe PaymentIntent, webhooks, validate UI currency wiring
+- `src/lib/supabase/env.ts` + guarded client/server/middleware  
+- `.env.example` with full variable list  
+- `.gitignore` allows `.env.example`; ignores `/launchlens/`  
+- `engines.node >= 20`; tsconfig excludes dead `src/api` and `launchlens`  
+- `docs/DEPLOYMENT.md` updated  
 
-### Notes
+### Verification
 
-- Product/business logic must not import gateway SDKs; use `@/lib/payments`.  
-- Next cycle: Stripe implementation behind the same interface + webhook fulfillment.
+- `npm run build` — success (Turbopack default)  
+- `npx next build --webpack` — success  
+
+---
+
+## 2026-08-04 — Global payment abstraction
+
+Payment domain layer (Razorpay IN live, Stripe ROW stub), quote/order APIs, docs.
 
 ---
 
 ## 2026-08-04 — LaunchLens-branded authentication UI
 
-**Agent:** Grok (xAI) — Lead Software Architect  
-**Scope:** User-facing auth branding only
-
-### Actions
-
-- Login/signup LaunchLens copy + Logo; forgot-password + verify-email pages  
-- Friendly errors; no provider names in UI  
-
-### Application code
-
-- Modified auth pages; added forgot-password + verify-email  
+Auth pages Logo + copy; forgot-password + verify-email.
 
 ---
 
-## 2026-08-03 — Architect docs suite + full repository index
+## 2026-08-03 — Docs suite + repository index
 
-Documentation pack under `docs/` (status, architecture, inventory, handoff, tasks, engineering rules, API, database, deployment, roadmap). Initial index of application code; no app logic changes in the docs-only commits.
-
----
-
-## Template for future entries
-
-```markdown
-## YYYY-MM-DD — Short title
-
-**Agent:** …
-**Scope:** …
-
-### Actions
-- …
-
-### Application code
-- Modified: … / Not modified
-
-### Notes
-- …
-```
+Initial documentation under `docs/`.
