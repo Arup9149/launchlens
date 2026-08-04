@@ -10,7 +10,7 @@ function VerifyEmailContent() {
   const email = searchParams.get("email") || ""
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6">
+    <div className="min-h-screen min-h-[100dvh] flex items-center justify-center px-6 py-10 safe-px safe-pb">
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
           <Logo href="/" size="md" />
@@ -39,7 +39,7 @@ function VerifyEmailContent() {
 
           <ul className="text-[13px] text-zinc-500 space-y-2 mb-8 list-disc list-inside">
             <li>The link may take a minute to arrive</li>
-            <li>Check spam or promotions if you don&apos;t see it</li>
+            <li>Check spam or promotions if you don't see it</li>
             <li>After confirming, return here to sign in</li>
           </ul>
 
@@ -67,7 +67,7 @@ export default function VerifyEmailPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center text-zinc-500">
+        <div className="min-h-screen min-h-[100dvh] flex items-center justify-center text-zinc-500 safe-px">
           Loading...
         </div>
       }
