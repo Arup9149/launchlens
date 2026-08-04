@@ -1,6 +1,6 @@
 # LaunchLens — Next Tasks
 
-Prioritized backlog. Last updated 2026-08-04 (Sprint 2).
+Prioritized backlog. Last updated 2026-08-04 (Sprint 2 responsive QA).
 
 ---
 
@@ -33,6 +33,7 @@ Prioritized backlog. Last updated 2026-08-04 (Sprint 2).
 
 | ID | Task |
 |----|------|
-| — | Sprint 2: responsive, SEO, a11y, perf defaults |
+| — | Sprint 2 C/D/E: responsive QA, SEO, a11y, perf defaults |
+| — | Auth shells + product safe-px + touch targets |
 | — | Sign-out redirect fix |
 | — | Sprint A/B: waitlist UX, email system, LAUNCH_CHECKLIST |
