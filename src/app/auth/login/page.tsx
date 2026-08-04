@@ -17,7 +17,6 @@ function friendlyAuthError(message: string) {
   if (lower.includes("too many requests")) {
     return "Too many attempts. Please wait a moment and try again."
   }
-  // Never surface provider names in the UI
   return message.replace(/supabase/gi, "LaunchLens").replace(/\s+/g, " ").trim()
 }
 
@@ -50,7 +49,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6">
+    <div className="min-h-screen min-h-[100dvh] flex items-center justify-center px-6 py-10 safe-px safe-pb">
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
           <Logo href="/" size="md" />
