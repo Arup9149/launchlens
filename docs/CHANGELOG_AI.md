@@ -4,7 +4,40 @@ Newest entries first.
 
 ---
 
-## 2026-08-04 — Launch Readiness Sprint 2 (C/D/E)
+## 2026-08-04 — Launch Readiness Sprint 2 (C/D/E) — responsive QA pass
+
+**Agent:** Grok (xAI) — Lead Software Architect  
+**Scope:** Full responsive audit + polish across all user-facing pages; a11y touch targets; safe-area consistency  
+**Architecture:** Frozen
+
+### Sprint C — Responsive QA & polish (this pass)
+
+- Auth shells unified: signup / forgot-password / verify-email now use `min-h-[100dvh]` + `safe-px` / `safe-pb` (match login)
+- All primary page containers (landing sections, dashboard, validate, result, workshop + sub-tools, guides) use `safe-px` instead of fixed `px-6` for notched devices
+- Primary CTAs on dashboard, guides, workshop tools, landing Early Bird: `min-h-11` / flex centering for ≥44px touch targets
+- Result loading state centered with safe padding
+- `.scrollbar-none` utility added (workspace nav horizontal scroll)
+
+### Sprint D — Performance (prior + retained)
+
+- Inter `display: swap` + preload
+- `next.config`: `compress`, `poweredByHeader: false`, strict mode
+- `prefers-reduced-motion` respected
+- No unused image pipeline; no framer-motion imports in app code
+
+### Sprint E / SEO / a11y (prior + this pass)
+
+- Metadata, robots, sitemap, skip link, focus-visible (retained)
+- Sign-out → `/auth/login` (retained)
+- Touch targets and safe-area extended to remaining auth + product surfaces
+
+### Not changed
+
+- Payment/auth architecture, Brain providers, Stripe stub, RLS, webhooks
+
+---
+
+## 2026-08-04 — Launch Readiness Sprint 2 (C/D/E) initial
 
 **Agent:** Grok (xAI) — Lead Software Architect  
 **Scope:** Responsive polish, performance defaults, SEO/a11y, launch audit fixes  
@@ -14,7 +47,7 @@ Newest entries first.
 - Safe-area padding helpers; overflow-x containment
 - Navbar/app nav touch targets (~44px), mobile CTA label, scrollable workspace nav
 - Logo tagline hidden below 360px width to prevent header clip
-- Auth screens: full viewport height + safe padding
+- Auth screens: full viewport height + safe padding (login first)
 - Production `not-found` page
 
 ### Sprint D — Performance

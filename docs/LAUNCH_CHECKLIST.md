@@ -1,6 +1,6 @@
 # LaunchLens — Launch Checklist
 
-**Last updated:** 2026-08-04 (Sprint 2)
+**Last updated:** 2026-08-04 (Sprint 2 responsive QA)
 
 ---
 
@@ -16,6 +16,9 @@
 ## 2. Responsive & a11y (Sprint C/E)
 
 - [x] Safe-area / overflow-x / touch targets on primary navs
+- [x] Safe-area + `100dvh` on all auth pages (login, signup, forgot, verify)
+- [x] Product pages (dashboard, validate, result, workshop, guides) on `safe-px`
+- [x] Primary CTAs min-height ≥44px
 - [x] Skip link + focus-visible
 - [x] Custom 404
 - [ ] Manual device matrix sign-off (desktop / tablet / mobile / landscape) on production URL
@@ -29,6 +32,7 @@
 - [x] `robots.ts` + `sitemap.ts`
 - [x] Favicon present (`src/app/favicon.ico`)
 - [ ] Confirm `NEXT_PUBLIC_APP_URL` matches production domain (canonical)
+- [ ] Optional: dedicated OG image asset (currently text metadata only)
 
 ---
 
