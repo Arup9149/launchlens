@@ -1,26 +1,28 @@
-import { createClient } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
+import { createClient } from "@/lib/supabase/server"
+import { useCreditForUser } from "@/lib/credits/server"
 
-function supabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
-
-export async function GET(request: Request) {
+/**
+ * Credits are scoped to auth.uid().
+ * - GET: current user's balance
+ * - POST action=use: consume 1 credit (authenticated)
+ * - POST action=grant is NOT available on this public API (webhook / verify only)
+ */
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url)
-    const email = searchParams.get("email")?.trim().toLowerCase()
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-    if (!email) {
-      return NextResponse.json({ error: "Email required" }, { status: 400 })
+    if (!user) {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 })
     }
 
-    const { data, error } = await supabase()
+    const { data, error } = await supabase
       .from("founder_credits")
-      .select("*")
-      .eq("email", email)
+      .select("credits, plan, email")
+      .eq("user_id", user.id)
       .maybeSingle()
 
     if (error) {
@@ -28,9 +30,10 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json({
-      email,
+      email: data?.email ?? user.email ?? null,
       credits: data?.credits ?? 0,
       plan: data?.plan ?? null,
+      userId: user.id,
     })
   } catch {
     return NextResponse.json({ error: "Failed" }, { status: 500 })
@@ -39,81 +42,46 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const email = String(body.email || "")
-      .trim()
-      .toLowerCase()
-    const action = body.action as "grant" | "use"
-    const amount = Number(body.amount || 0)
-    const plan = body.plan || "early_bird"
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-    if (!email || !email.includes("@")) {
-      return NextResponse.json({ error: "Valid email required" }, { status: 400 })
+    if (!user) {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 })
     }
 
-    const db = supabase()
-    const { data: existing } = await db
-      .from("founder_credits")
-      .select("*")
-      .eq("email", email)
-      .maybeSingle()
+    const body = await request.json().catch(() => ({}))
+    const action = body.action as string
 
+    // Hard block: clients cannot grant credits
     if (action === "grant") {
-      const add = amount > 0 ? amount : 2
-      if (!existing) {
-        const { data, error } = await db
-          .from("founder_credits")
-          .insert([{ email, credits: add, plan }])
-          .select()
-          .single()
-        if (error) {
-          return NextResponse.json({ error: error.message }, { status: 500 })
-        }
-        return NextResponse.json({ credits: data.credits, plan: data.plan })
-      }
-
-      const { data, error } = await db
-        .from("founder_credits")
-        .update({
-          credits: existing.credits + add,
-          plan,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("email", email)
-        .select()
-        .single()
-
-      if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 })
-      }
-      return NextResponse.json({ credits: data.credits, plan: data.plan })
+      return NextResponse.json(
+        {
+          error:
+            "Credit grants are server-only. Complete checkout; fulfillment is via verified payment.",
+        },
+        { status: 403 }
+      )
     }
 
-    if (action === "use") {
-      if (!existing || existing.credits < 1) {
+    if (action !== "use") {
+      return NextResponse.json({ error: "Invalid action" }, { status: 400 })
+    }
+
+    try {
+      const result = await useCreditForUser(supabase, user.id)
+      return NextResponse.json({ credits: result.credits, plan: result.plan })
+    } catch (err: unknown) {
+      const e = err as { status?: number; message?: string; credits?: number }
+      if (e.status === 402) {
         return NextResponse.json(
-          { error: "No validations remaining", credits: existing?.credits ?? 0 },
+          { error: e.message || "No validations remaining", credits: e.credits ?? 0 },
           { status: 402 }
         )
       }
-
-      const { data, error } = await db
-        .from("founder_credits")
-        .update({
-          credits: existing.credits - 1,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("email", email)
-        .select()
-        .single()
-
-      if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 })
-      }
-      return NextResponse.json({ credits: data.credits, plan: data.plan })
+      throw err
     }
-
-    return NextResponse.json({ error: "Invalid action" }, { status: 400 })
   } catch {
     return NextResponse.json({ error: "Failed" }, { status: 500 })
   }
