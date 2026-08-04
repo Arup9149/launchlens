@@ -58,7 +58,7 @@ export function Logo({
           </span>
           {showTagline && (
             <span
-              className={`${taglineSize} mt-1 text-zinc-500 group-hover:text-zinc-400 transition font-normal`}
+              className={`${taglineSize} mt-1 text-zinc-500 group-hover:text-zinc-400 transition font-normal max-[360px]:hidden`}
             >
               Know before you build.
             </span>
