@@ -1,68 +1,64 @@
 import { NextResponse } from "next/server"
+import { selectBrainEngine } from "@/lib/brain/provider"
 
 export async function GET() {
-  const hasOR = !!process.env.OPENROUTER_API_KEY
+  const hasOR = !!process.env.OPENROUTER_API_KEY?.trim()
   const provider = (process.env.BRAIN_PROVIDER || "auto").toLowerCase()
 
-  // OpenRouter configured → treat Brain as online for product use
-  if (provider === "openrouter" && hasOR) {
-    return NextResponse.json({
-      ok: true,
-      engine: "openrouter",
-      message: "Brain online · OpenRouter",
-    })
-  }
-
-  if (provider === "auto" && hasOR) {
-    return NextResponse.json({
-      ok: true,
-      engine: "openrouter",
-      message: "Brain online · OpenRouter (auto)",
-    })
-  }
-
   try {
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 4000)
+    const selection = selectBrainEngine()
 
-    const res = await fetch("http://127.0.0.1:11434/api/tags", {
-      method: "GET",
-      signal: controller.signal,
-      cache: "no-store",
-    })
-    clearTimeout(timeout)
-
-    if (!res.ok) {
+    // Never probe Ollama on serverless / when OpenRouter is the selected engine
+    if (selection.engine === "openrouter") {
       return NextResponse.json({
-        ok: hasOR,
-        engine: hasOR ? "openrouter" : "none",
-        message: hasOR
-          ? "OpenRouter ready (Ollama down)"
-          : "Ollama error. Add OPENROUTER_API_KEY or fix Ollama.",
+        online: true,
+        engine: "openrouter",
+        endpoint: selection.endpoint,
+        reason: selection.reason,
+        message: "Brain online · OpenRouter",
       })
     }
 
-    const data = await res.json()
-    const models: string[] = (data.models || []).map((m: any) => m.name || "")
-    const hasQwen = models.some((n) => n.includes("qwen2.5"))
-
+    // Explicit local Ollama path only
+    try {
+      const res = await fetch("http://127.0.0.1:11434/api/tags", {
+        signal: AbortSignal.timeout(2000),
+      })
+      if (!res.ok) {
+        return NextResponse.json({
+          online: false,
+          engine: "none",
+          message: "Ollama is offline. Run: ollama serve",
+        })
+      }
+      const data = (await res.json()) as {
+        models?: { name?: string }[]
+      }
+      const hasQwen = (data.models || []).some((m) =>
+        String(m.name || "").includes("qwen")
+      )
+      return NextResponse.json({
+        online: true,
+        engine: hasQwen ? "ollama" : "ollama",
+        message: hasQwen
+          ? "Brain online · Ollama (qwen)"
+          : "Brain online · Ollama",
+      })
+    } catch {
+      return NextResponse.json({
+        online: false,
+        engine: "none",
+        message: "Ollama is offline. Run: ollama serve",
+      })
+    }
+  } catch (err: any) {
     return NextResponse.json({
-      ok: hasQwen || hasOR,
-      engine: hasQwen ? "ollama" : hasOR ? "openrouter" : "none",
-      hasQwen,
-      message: hasQwen
-        ? "Brain online · Ollama qwen2.5"
-        : hasOR
-        ? "OpenRouter ready"
-        : "No Brain available",
-    })
-  } catch {
-    return NextResponse.json({
-      ok: hasOR,
+      online: hasOR,
       engine: hasOR ? "openrouter" : "none",
       message: hasOR
         ? "Brain online · OpenRouter"
-        : "Ollama offline. Add OPENROUTER_API_KEY for cloud Brain.",
+        : err?.message || "Brain offline",
+      provider,
     })
   }
 }

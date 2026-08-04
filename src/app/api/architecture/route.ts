@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { runBrainJson } from "@/lib/brain/provider"
 
 export async function POST(request: Request) {
   try {
@@ -74,45 +75,13 @@ Rules:
 - Be specific to THIS idea, not generic.
 - Keep language practical and founder-oriented.`
 
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 120000)
-
-    const ollamaRes = await fetch("http://localhost:11434/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "qwen2.5:7b",
-        prompt,
-        stream: false,
-        format: "json",
-        options: {
-          temperature: 0.35,
-          num_predict: 2000,
-        },
-      }),
-      signal: controller.signal,
+    const { data, engine } = await runBrainJson(prompt, "/api/architecture", {
+      temperature: 0.35,
+      ollamaNumPredict: 2000,
+      ollamaTimeoutMs: 120000,
     })
 
-    clearTimeout(timeout)
-
-    if (!ollamaRes.ok) {
-      return NextResponse.json(
-        { error: "Brain is offline. Is Ollama running?" },
-        { status: 500 }
-      )
-    }
-
-    const data = await ollamaRes.json()
-    let result: any
-
-    try {
-      result = JSON.parse(data.response)
-    } catch {
-      const match = String(data.response || "").match(/\{[\s\S]*\}/)
-      if (match) result = JSON.parse(match[0])
-      else throw new Error("Could not parse Brain response")
-    }
-
+    const result = data as any
     const clamp = (n: any, fb = 60) => {
       const v = Number(n)
       if (Number.isNaN(v)) return fb
@@ -121,18 +90,24 @@ Rules:
 
     return NextResponse.json({
       potentialScore: clamp(result.potentialScore, 65),
-      flowSteps: Array.isArray(result.flowSteps) ? result.flowSteps.slice(0, 5) : [],
+      flowSteps: Array.isArray(result.flowSteps)
+        ? result.flowSteps.slice(0, 5)
+        : [],
       modules: Array.isArray(result.modules) ? result.modules.slice(0, 8) : [],
-      techStack: Array.isArray(result.techStack) ? result.techStack.slice(0, 7) : [],
-      buildOrder: Array.isArray(result.buildOrder) ? result.buildOrder.slice(0, 6) : [],
+      techStack: Array.isArray(result.techStack)
+        ? result.techStack.slice(0, 7)
+        : [],
+      buildOrder: Array.isArray(result.buildOrder)
+        ? result.buildOrder.slice(0, 6)
+        : [],
       risks: Array.isArray(result.risks) ? result.risks.slice(0, 4) : [],
       metrics: Array.isArray(result.metrics) ? result.metrics.slice(0, 4) : [],
       thirtyDayPlan: Array.isArray(result.thirtyDayPlan)
         ? result.thirtyDayPlan.slice(0, 4)
         : [],
+      engine,
     })
   } catch (err: any) {
-    console.error(err)
     if (err?.name === "AbortError") {
       return NextResponse.json(
         { error: "Brain took too long. Try a shorter idea." },
@@ -140,7 +115,13 @@ Rules:
       )
     }
     return NextResponse.json(
-      { error: err.message || "Architecture generation failed" },
+      {
+        error:
+          err?.message?.includes("OPENROUTER") ||
+          err?.message?.includes("Brain unavailable")
+            ? "Brain is temporarily unavailable. Please try again shortly."
+            : err?.message || "Architecture generation failed",
+      },
       { status: 500 }
     )
   }

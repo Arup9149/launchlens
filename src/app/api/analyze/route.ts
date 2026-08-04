@@ -4,7 +4,7 @@ import { runBrainJson } from "@/lib/brain/provider"
 function clamp(n: any, fallback = 50) {
   const v = Number(n)
   if (Number.isNaN(v)) return fallback
-  return Math.max(0, Math.min(100, Math.round(v))
+  return Math.max(0, Math.min(100, Math.round(v)))
 }
 
 function normalize(analysis: any) {

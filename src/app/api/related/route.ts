@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { runBrainJson } from "@/lib/brain/provider"
 
 export async function POST(request: Request) {
   try {
@@ -39,50 +40,17 @@ Prefer:
 
 Be specific to the given idea. No generic filler.`
 
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 90000)
-
-    const ollamaRes = await fetch("http://localhost:11434/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "qwen2.5:7b",
-        prompt,
-        stream: false,
-        format: "json",
-        options: {
-          temperature: 0.5,
-          num_predict: 1400,
-        },
-      }),
-      signal: controller.signal,
+    const { data, engine } = await runBrainJson(prompt, "/api/related", {
+      temperature: 0.5,
+      ollamaNumPredict: 1400,
+      ollamaTimeoutMs: 90000,
     })
 
-    clearTimeout(timeout)
-
-    if (!ollamaRes.ok) {
-      return NextResponse.json(
-        { error: "Brain is offline. Is Ollama running?" },
-        { status: 500 }
-      )
-    }
-
-    const data = await ollamaRes.json()
-    let result: any
-
-    try {
-      result = JSON.parse(data.response)
-    } catch {
-      const match = String(data.response || "").match(/\{[\s\S]*\}/)
-      if (match) result = JSON.parse(match[0])
-      else throw new Error("Could not parse Brain response")
-    }
-
+    const result = data as any
     const ideas = Array.isArray(result.ideas) ? result.ideas.slice(0, 5) : []
 
-    return NextResponse.json({ ideas })
+    return NextResponse.json({ ideas, engine })
   } catch (err: any) {
-    console.error(err)
     if (err?.name === "AbortError") {
       return NextResponse.json(
         { error: "Brain took too long. Try again." },
@@ -90,7 +58,13 @@ Be specific to the given idea. No generic filler.`
       )
     }
     return NextResponse.json(
-      { error: err.message || "Related ideas failed" },
+      {
+        error:
+          err?.message?.includes("OPENROUTER") ||
+          err?.message?.includes("Brain unavailable")
+            ? "Brain is temporarily unavailable. Please try again shortly."
+            : err?.message || "Related ideas failed",
+      },
       { status: 500 }
     )
   }
