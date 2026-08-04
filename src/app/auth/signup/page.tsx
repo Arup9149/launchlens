@@ -56,7 +56,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6">
+    <div className="min-h-screen min-h-[100dvh] flex items-center justify-center px-6 py-10 safe-px safe-pb">
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
           <Logo href="/" size="md" />
