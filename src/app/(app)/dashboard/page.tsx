@@ -116,7 +116,7 @@ export default function DashboardPage() {
             )}
           </div>
           <p className="text-[15px] text-zinc-500">
-            Your Early Founder workspace
+            Your Early Founder Beta workspace
           </p>
         </div>
         <Link
@@ -129,7 +129,7 @@ export default function DashboardPage() {
 
       {credits === 0 && (
         <div className="mb-10">
-          <UpgradePanel />
+          <UpgradePanel email={email} />
         </div>
       )}
 
@@ -150,7 +150,7 @@ export default function DashboardPage() {
                 ? "Sign in to load your Founder Validations"
                 : founderValidationsLabel(credits)}
               {plan === "early_bird"
-                ? " · Early Founder cohort"
+                ? " · Early Founder Beta"
                 : plan
                   ? ` · ${plan}`
                   : ""}
