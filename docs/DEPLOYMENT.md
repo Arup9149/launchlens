@@ -31,13 +31,13 @@ See **`.env.example`** for the full template.
 |----------|----------|--------|
 | `EMAIL_PROVIDER` | No | Default `resend` |
 | `EMAIL_FROM_NAME` | No | Default `LaunchLens` |
-| `EMAIL_FROM_ADDRESS` | Yes for email | Verified sender at provider |
+| `EMAIL_FROM_ADDRESS` | No (MVP default) | Default `onboarding@resend.dev`; override after domain verify |
 | `EMAIL_REPLY_TO` | No | Optional |
 | `RESEND_API_KEY` | Yes for Resend | [resend.com/api-keys](https://resend.com/api-keys) |
 
 **Behavior:** Waitlist **always** stores the email when Supabase succeeds. Confirmation email is best-effort: failures are logged and **never** return an error to the user.
 
-**Sender identity:** 100% from env. Production target after DNS verify:
+**Sender identity:** 100% from env. MVP default From: `LaunchLens <onboarding@resend.dev>`. Production target after DNS verify:
 `EMAIL_FROM_NAME=LaunchLens` + `EMAIL_FROM_ADDRESS=team@launchlens.ai`  
 (no code change; DNS is an ops step outside this sprint).
 
@@ -84,12 +84,6 @@ npm run dev
 
 ## 4. Vercel notes
 
-- Root directory = repo root (not nested `launchlens/`).  
-- Node 20+.  
-- Build: `npm run build`.
-
----
-
-## Launch checklist
-
-See **`docs/LAUNCH_CHECKLIST.md`** for the full pre-launch checklist.
+- Root directory: repository root (not a nested app folder).
+- Framework preset: Next.js.
+- Set `RESEND_API_KEY` for waitlist welcome delivery.

@@ -1,6 +1,6 @@
 # LaunchLens — Launch Checklist
 
-**Last updated:** 2026-08-04 (Authentication UX)
+**Last updated:** 2026-08-04 (MVP Email Branding)
 
 ---
 
@@ -53,7 +53,8 @@
 - [ ] `NEXT_PUBLIC_APP_URL`
 - [ ] `OPENROUTER_API_KEY` (prod Brain)
 - [ ] Razorpay pair if charging IN
-- [ ] `RESEND_API_KEY` + `EMAIL_FROM_*`
+- [x] `EMAIL_PROVIDER` / `EMAIL_FROM_NAME` / `EMAIL_FROM_ADDRESS` defaults (MVP Resend sender)
+- [ ] `RESEND_API_KEY` on host (required for delivery)
 - [ ] `NEXT_PUBLIC_SKIP_PAYMENT=false` in production
 
 ---
