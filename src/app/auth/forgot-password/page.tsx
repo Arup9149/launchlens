@@ -5,8 +5,35 @@ import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
 import { Logo } from "@/components/logo"
 
-function friendlyAuthError(message: string) {
-  return message.replace(/supabase/gi, "LaunchLens").replace(/\s+/g, " ").trim()
+/**
+ * Map provider/auth errors to founder-facing copy.
+ * Raw message is logged by the caller — never disable provider rate limits.
+ */
+function friendlyResetError(message: string): string {
+  const lower = (message || "").toLowerCase()
+
+  if (
+    lower.includes("rate limit") ||
+    lower.includes("rate_limit") ||
+    lower.includes("too many requests") ||
+    lower.includes("email rate limit exceeded") ||
+    lower.includes("over_email_send_rate_limit")
+  ) {
+    return "You've requested a password reset several times recently. Please wait a few minutes before trying again."
+  }
+
+  if (lower.includes("invalid") && lower.includes("email")) {
+    return "Please enter a valid email address."
+  }
+
+  if (lower.includes("network") || lower.includes("fetch failed")) {
+    return "We couldn't reach the server. Check your connection and try again."
+  }
+
+  return message
+    .replace(/supabase/gi, "LaunchLens")
+    .replace(/\s+/g, " ")
+    .trim()
 }
 
 export default function ForgotPasswordPage() {
@@ -24,12 +51,26 @@ export default function ForgotPasswordPage() {
     const origin =
       typeof window !== "undefined" ? window.location.origin : ""
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: origin ? `${origin}/auth/login` : undefined,
-    })
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+      email.trim(),
+      {
+        redirectTo: origin ? `${origin}/auth/login` : undefined,
+      }
+    )
 
-    if (error) {
-      setError(friendlyAuthError(error.message))
+    if (resetError) {
+      // Preserve underlying provider error for diagnostics
+      console.error(
+        JSON.stringify({
+          level: "error",
+          msg: "auth.password_reset_failed",
+          email: email.trim().toLowerCase(),
+          providerMessage: resetError.message,
+          status: resetError.status,
+          name: resetError.name,
+        })
+      )
+      setError(friendlyResetError(resetError.message))
       setLoading(false)
       return
     }
@@ -50,13 +91,16 @@ export default function ForgotPasswordPage() {
             Reset your password
           </h1>
           <p className="text-[14px] text-zinc-500 mb-8 text-center sm:text-left leading-relaxed">
-            We'll help you get back into LaunchLens.
+            We&apos;ll help you get back into LaunchLens.
           </p>
 
           {sent ? (
             <div className="space-y-6">
-              <p className="text-[14px] text-emerald-400 leading-relaxed" role="status">
-                If an account exists for that email, you'll receive a reset
+              <p
+                className="text-[14px] text-emerald-400 leading-relaxed"
+                role="status"
+              >
+                If an account exists for that email, you&apos;ll receive a reset
                 link shortly. Check your inbox and spam folder.
               </p>
               <Link
