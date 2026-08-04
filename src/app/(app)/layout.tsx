@@ -9,7 +9,7 @@ export default function AppLayout({
   return (
     <div className="min-h-screen">
       <header className="border-b border-white/[0.06] sticky top-0 z-40 backdrop-blur-xl bg-black/40">
-        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Logo href="/dashboard" size="md" />
 
           <nav className="flex items-center gap-1 sm:gap-2">
