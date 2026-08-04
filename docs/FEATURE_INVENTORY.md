@@ -1,6 +1,6 @@
 # LaunchLens — Feature Inventory
 
-**Last updated:** 2026-08-04 (Early Founder Experience)
+**Last updated:** 2026-08-04 (Launch Readiness — Founder Experience Refinement)
 
 ### Platform
 
@@ -19,10 +19,12 @@
 |---------|--------|
 | First-login onboarding modal | **Done** |
 | Founder Validations copy (UI) | **Done** |
+| Landing free CTAs (no pre-value ₹799) | **Done** |
 | Upgrade panel (allocation exhausted) | **Done** |
 | Validation complete message | **Done** |
-| Founder Playbook PDF | **Done** (`/founder/launchlens-founder-playbook.pdf`) |
-| 20-Day Builder Program PDF | **Done** (`/founder/launch-in-20-days.pdf`) |
+| Personalized Founder Playbook (print/PDF) | **Done** (`src/lib/founder-print.ts`) |
+| Personalized 20-Day Builder Program | **Done** (`src/lib/founder-print.ts`) |
+| Playbook access on result + dashboard | **Done** |
 
 ### Security / billing
 

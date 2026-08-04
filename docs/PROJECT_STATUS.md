@@ -1,16 +1,17 @@
 # LaunchLens — Project Status
 
-**Last status update:** 2026-08-04 (Early Founder Experience FINAL)  
+**Last status update:** 2026-08-04 (Launch Readiness — Founder Experience Refinement)  
 **Branch:** `main`  
-**Status:** Early Founder UX + premium playbooks shipped; ops still required for P0 SQL/secrets before open monetization
+**Status:** Founder messaging standardized; personalized playbooks; pricing gated until validations exhausted; ops still required for P0 SQL/secrets before open monetization
 
-### This sprint (Early Founder Experience)
+### This sprint (Founder Experience Refinement)
 
-- First-login onboarding modal (Early Founder Cohort) with 🎉 Welcome
-- UI language: **Founder Validations** (never “Credits” in product UI)
-- Upgrade panel when allocation is exhausted
-- Post-validation completion message (“Excellent work…”)
-- Downloadable **Founder Playbook** (16 pp) + **20-Day Builder Program** (21 pp) under `/public/founder/`
+- Landing: Start Free / Join Founder Cohort — no ₹799 payment CTA before value
+- Standardized benefits: 3 Founder Validations, Personalized Founder Playbook, Personalized 20-Day Builder Program, AI Workshop, Early Founder Cohort
+- Validate: ₹799 / Become an Early Founder only when Founder Validations remaining = 0
+- Result: completion message + **Download Founder Playbook** + **Download 20-Day Builder Program** (print-ready personalized HTML → Save as PDF)
+- Dashboard: same personalized downloads (uses latest validation)
+- Onboarding benefits list aligned with cohort package
 
 ### Still open (ops / P0 leftovers)
 

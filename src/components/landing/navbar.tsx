@@ -27,8 +27,8 @@ export function Navbar() {
             href="/validate"
             className="text-[12px] sm:text-[13px] font-medium px-3.5 sm:px-4 py-2.5 rounded-full bg-violet-600 hover:bg-violet-500 text-white transition min-h-11 inline-flex items-center"
           >
-            <span className="sm:hidden">Early Bird</span>
-            <span className="hidden sm:inline">Early Bird · ₹799</span>
+            <span className="sm:hidden">Start Free</span>
+            <span className="hidden sm:inline">Start Free</span>
           </Link>
         </nav>
       </div>

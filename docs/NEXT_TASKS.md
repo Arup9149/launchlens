@@ -1,6 +1,6 @@
 # LaunchLens — Next Tasks
 
-Prioritized backlog. Last updated 2026-08-04 (Early Founder Experience FINAL).
+Prioritized backlog. Last updated 2026-08-04 (Launch Readiness — Founder Experience Refinement).
 
 ---
 
@@ -41,6 +41,7 @@ Prioritized backlog. Last updated 2026-08-04 (Early Founder Experience FINAL).
 
 | Task |
 |------|
-| Early Founder onboarding, Founder Validations copy, upgrade panel, result completion, playbook PDFs |
+| Launch Readiness: landing free CTAs, gated ₹799, personalized playbook + 20-day PDFs, onboarding copy |
+| Early Founder onboarding, Founder Validations copy, upgrade panel, result completion |
 | P0 Security code path |
 | Sprint 2 responsive / SEO / a11y |
