@@ -10,11 +10,16 @@ export type FounderPrintContext = {
 }
 
 function esc(s: string) {
+  // Built without raw HTML entities in source so API/HTML pipelines cannot corrupt them
+  const amp = "&" + "amp;"
+  const lt = "&" + "lt;"
+  const gt = "&" + "gt;"
+  const quot = "&" + "quot;"
   return s
-    .replace(/&/g, "&")
-    .replace(/</g, "<")
-    .replace(/>/g, ">")
-    .replace(/"/g, """)
+    .replace(/&/g, amp)
+    .replace(/</g, lt)
+    .replace(/>/g, gt)
+    .replace(/"/g, quot)
 }
 
 function openPrintWindow(title: string, bodyHtml: string) {
@@ -87,7 +92,7 @@ export function printFounderPlaybook(ctx: FounderPrintContext = {}) {
   </div>
 </div>
 <div class="section">
-  <h2>4. Wedge & MVP</h2>
+  <h2>4. Wedge and MVP</h2>
   <ul>
     <li>One wedge outcome in under 10 minutes of product use.</li>
     <li>Ship the smallest path that proves that outcome.</li>
