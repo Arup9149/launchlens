@@ -100,7 +100,6 @@ export default function ValidatePage() {
 
   const unlockGuides = () => {
     localStorage.setItem("ll_guides_unlocked", "1")
-    // One tab is more reliable than two (popup blockers)
     window.open("/guides/starter", "_blank")
   }
 
@@ -133,19 +132,19 @@ export default function ValidatePage() {
 
     const userEmail = email.trim().toLowerCase()
     if (!userEmail.includes("@")) {
-      alert("Enter the email for your Early Bird credits")
+      alert("Add the email tied to your Early Bird credits so we can unlock your report.")
       return
     }
 
     localStorage.setItem("ll_email", userEmail)
 
     if (brainOk === false) {
-      alert("Brain is offline. Open Ollama and retry.")
+      alert("The Brain is offline right now. Start Ollama locally or set OPENROUTER_API_KEY, then try again.")
       return
     }
 
     setLoading(true)
-    setStatus("Checking credits...")
+    setStatus("Checking your founder credits…")
 
     try {
       const creditRes = await fetch(
@@ -157,7 +156,7 @@ export default function ValidatePage() {
       const hasCredit = remaining > 0
 
       if (!hasCredit && !skipPayment) {
-        setStatus("Connecting to Brain...")
+        setStatus("Running your idea through the Brain…")
 
         const analyzeRes = await fetch("/api/analyze", {
           method: "POST",
@@ -174,7 +173,7 @@ export default function ValidatePage() {
         const verdict = analysis.verdict
         const confidence = analysis.confidence
 
-        setStatus("Saving result...")
+        setStatus("Saving your validation…")
         const saveRes = await fetch("/api/validations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -189,7 +188,7 @@ export default function ValidatePage() {
         const saveData = await saveRes.json()
         const validationId = saveData?.id
 
-        setStatus("Opening payment...")
+        setStatus("Opening secure checkout…")
         const orderRes = await fetch("/api/razorpay/order", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -241,11 +240,11 @@ export default function ValidatePage() {
       }
 
       if (hasCredit && !skipPayment) {
-        setStatus("Using 1 credit...")
+        setStatus("Using 1 validation credit…")
         await useCredit(userEmail)
       }
 
-      setStatus("Connecting to Brain...")
+      setStatus("Running your idea through the Brain…")
       const analyzeRes = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -261,7 +260,7 @@ export default function ValidatePage() {
       const verdict = analysis.verdict
       const confidence = analysis.confidence
 
-      setStatus("Saving result...")
+      setStatus("Saving your validation…")
       const saveRes = await fetch("/api/validations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -280,7 +279,7 @@ export default function ValidatePage() {
         localStorage.setItem("ll_guides_unlocked", "1")
       }
 
-      setStatus("Opening report...")
+      setStatus("Opening your report…")
       goToResult(analysis, score, verdict, confidence, validationId)
     } catch (err: any) {
       console.error(err)
@@ -362,7 +361,7 @@ export default function ValidatePage() {
           <textarea
             value={idea}
             onChange={(e) => setIdea(e.target.value)}
-            placeholder="Describe the product clearly..."
+            placeholder="Describe the product clearly — problem, who it is for, and why now..."
             rows={7}
             required
             className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl px-5 py-4 text-[15px] text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500/40 transition resize-none leading-relaxed"
@@ -385,7 +384,7 @@ export default function ValidatePage() {
             {loading ? (
               <span className="flex items-center gap-2">
                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                {status || "Processing..."}
+                {status || "Working on it…"}
               </span>
             ) : credits && credits > 0 ? (
               "Validate with credit"
