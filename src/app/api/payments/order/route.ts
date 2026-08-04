@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server"
-import {
-  createPaymentOrder,
-  inferCountryFromHints,
-  normalizeCountry,
-  type ProductId,
-  type SupportedCurrency,
-} from "@/lib/payments"
+import { createPaymentOrder } from "@/lib/payments"
+import type { ProductId } from "@/lib/payments/types"
+import { createClient } from "@/lib/supabase/server"
+import { normalizeCountry } from "@/lib/payments/region"
 
 const PRODUCTS: ProductId[] = [
   "early_bird",
@@ -14,40 +11,53 @@ const PRODUCTS: ProductId[] = [
   "architecture_guide",
 ]
 
+/**
+ * Provider-agnostic order create.
+ * Requires authenticated user so order notes bind user_id for webhook fulfillment.
+ */
 export async function POST(request: Request) {
   try {
-    const body = await request.json().catch(() => ({}))
-    const productId = (body.productId || body.product || "early_bird") as ProductId
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
+    if (!user) {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 })
+    }
+
+    const body = await request.json().catch(() => ({}))
+    const productId = (body.productId || "early_bird") as ProductId
     if (!PRODUCTS.includes(productId)) {
       return NextResponse.json({ error: "Unknown product" }, { status: 400 })
     }
 
-    const headerCountry =
-      request.headers.get("x-vercel-ip-country") ||
-      request.headers.get("cf-ipcountry") ||
-      request.headers.get("x-country-code")
+    const email = (user.email || body.email || "").trim().toLowerCase()
+    const creditsForProduct =
+      productId === "early_bird"
+        ? 2
+        : productId === "builder_pass"
+          ? 3
+          : productId === "pro_launch"
+            ? 5
+            : 0
 
     const country =
       normalizeCountry(body.country) ||
-      inferCountryFromHints({
-        acceptLanguage: request.headers.get("accept-language"),
-        headerCountry,
-      })
+      normalizeCountry(request.headers.get("x-vercel-ip-country")) ||
+      normalizeCountry(request.headers.get("cf-ipcountry")) ||
+      undefined
 
     const result = await createPaymentOrder({
       productId,
-      customerEmail: body.email ? String(body.email) : undefined,
-      ctx: {
-        country,
-        preferredCurrency: body.currency as SupportedCurrency | undefined,
-        preferredProvider: body.provider || undefined,
-      },
+      customerEmail: email || undefined,
+      ctx: { country },
       metadata: {
-        idea: body.idea ? String(body.idea).slice(0, 200) : "",
-        score: body.score != null ? String(body.score) : "",
-        verdict: body.verdict != null ? String(body.verdict) : "",
-        confidence: body.confidence != null ? String(body.confidence) : "",
+        user_id: user.id,
+        email,
+        product: productId,
+        plan: productId,
+        credits: String(creditsForProduct),
       },
     })
 
@@ -56,23 +66,22 @@ export async function POST(request: Request) {
       orderId: result.orderId,
       amount: result.amount,
       currency: result.currency,
-      productLabel: result.productLabel,
-      client: result.client,
-      // Backward-compatible fields for existing Razorpay client code
       key: result.client.key,
+      clientSecret: result.client.clientSecret,
+      publishableKey: result.client.publishableKey,
     })
   } catch (err: unknown) {
-    const e = err as Error & { code?: string; quote?: unknown }
-    console.error("[payments/order]", err)
+    const message = err instanceof Error ? err.message : "Order failed"
     const status =
-      e.code === "PROVIDER_NOT_CONFIGURED" || e.code === "PROVIDER_NOT_IMPLEMENTED"
-        ? 503
-        : 500
+      /not configured|not implemented/i.test(message) ? 503 : 500
     return NextResponse.json(
       {
-        error: e.message || "Order failed",
-        code: e.code,
-        quote: e.quote,
+        error: message,
+        code: /not configured/i.test(message)
+          ? "PROVIDER_NOT_CONFIGURED"
+          : /not implemented/i.test(message)
+            ? "PROVIDER_NOT_IMPLEMENTED"
+            : undefined,
       },
       { status }
     )
