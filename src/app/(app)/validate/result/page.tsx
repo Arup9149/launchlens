@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Suspense, useEffect, useState } from "react"
+import { printBuilderProgram, printFounderPlaybook } from "@/lib/founder-print"
 
 type Analysis = {
   idea: string
@@ -158,12 +159,38 @@ function ResultContent() {
               Powered by LaunchLens Brain
             </p>
           </div>
-          <button
-            onClick={() => window.print()}
-            className="shrink-0 text-[13px] font-medium px-5 py-2.5 rounded-full border border-white/10 text-zinc-300 hover:bg-white/5 transition"
-          >
-            Download PDF
-          </button>
+          <div className="flex flex-wrap gap-2 justify-end">
+            <button
+              onClick={() => window.print()}
+              className="shrink-0 text-[13px] font-medium px-5 py-2.5 rounded-full border border-white/10 text-zinc-300 hover:bg-white/5 transition"
+            >
+              Download PDF
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                printFounderPlaybook({
+                  startupName: idea?.slice(0, 60),
+                  idea,
+                })
+              }
+              className="shrink-0 text-[13px] font-medium px-5 py-2.5 rounded-full border border-violet-500/40 text-violet-200 hover:bg-violet-500/10 transition"
+            >
+              Download Founder Playbook
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                printBuilderProgram({
+                  startupName: idea?.slice(0, 60),
+                  idea,
+                })
+              }
+              className="shrink-0 text-[13px] font-medium px-5 py-2.5 rounded-full border border-violet-500/40 text-violet-200 hover:bg-violet-500/10 transition"
+            >
+              Download 20-Day Builder Program
+            </button>
+          </div>
         </div>
       </div>
 
