@@ -1,6 +1,6 @@
 # LaunchLens — Feature Inventory
 
-**Last updated:** 2026-08-04 (P0 Security)
+**Last updated:** 2026-08-04 (Early Founder Experience)
 
 ### Platform
 
@@ -13,15 +13,23 @@
 | Sign-out → `/auth/login` | **Done** |
 | Profile page | **Missing** |
 
+### Early Founder experience
+
+| Feature | Status |
+|---------|--------|
+| First-login onboarding modal | **Done** |
+| Founder Validations copy (UI) | **Done** |
+| Upgrade panel (allocation exhausted) | **Done** |
+| Validation complete message | **Done** |
+| Founder Playbook PDF | **Done** (`/founder/launchlens-founder-playbook.pdf`) |
+| 20-Day Builder Program PDF | **Done** (`/founder/launch-in-20-days.pdf`) |
+
 ### Security / billing
 
 | Feature | Status |
 |---------|--------|
-| Razorpay order create (auth-bound notes) | **Done** |
-| Razorpay payment verify (signature) | **Done** |
-| Razorpay webhook + idempotent grant | **Done** (env + SQL required) |
+| Razorpay webhook + verify | **Done** (env + SQL required) |
 | Client credit grant | **Removed** (403) |
-| Credits by `auth.uid()` | **Done** |
-| Validations by `auth.uid()` | **Done** |
-| RLS policies | **SQL shipped** — apply in Supabase |
+| Credits / validations by `auth.uid()` | **Done** |
+| RLS SQL | **Shipped** — apply in Supabase |
 | Stripe live checkout | **Stub** |

@@ -1,15 +1,21 @@
 # LaunchLens — Project Status
 
-**Last status update:** 2026-08-04 (P0 Security Sprint)  
+**Last status update:** 2026-08-04 (Early Founder Experience sprint)  
 **Branch:** `main`  
-**Status:** Early Access possible after Supabase migration + env; **public monetization** still gated on live webhook verification in production
+**Status:** Early Founder UX + premium playbooks shipped; ops still required for P0 SQL/secrets before open monetization
 
-### P0 Security notes
+### This sprint
 
-- Razorpay webhook + payment verify → server-side idempotent credit grant  
-- Client `action=grant` **forbidden**  
-- Credits + validations scoped to `auth.uid()`  
-- RLS SQL shipped in `docs/migrations/001_p0_security.sql` (must be applied in Supabase)  
-- Stripe still stub  
+- First-login onboarding modal (Early Founder Cohort)
+- UI language: **Founder Validations** (not “credits”)
+- Upgrade panel when allocation is exhausted
+- Post-validation completion message
+- Downloadable **Founder Playbook** + **20-Day Builder Program** PDFs
 
-See `docs/LAUNCH_CHECKLIST.md` and `docs/DATABASE.md`.
+### Still open (ops / P0 leftovers)
+
+- Apply `docs/migrations/001_p0_security.sql` in Supabase
+- Live webhook + service role on Vercel
+- Stripe checkout (stub)
+
+See `docs/LAUNCH_CHECKLIST.md`.
