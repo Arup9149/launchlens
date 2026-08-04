@@ -7,33 +7,36 @@ export default function AppLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-white/[0.06] sticky top-0 z-40 backdrop-blur-xl bg-black/40">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+    <div className="min-h-screen min-h-[100dvh] flex flex-col">
+      <header className="border-b border-white/[0.06] sticky top-0 z-40 backdrop-blur-xl bg-black/40 safe-pt">
+        <div className="max-w-6xl mx-auto safe-px h-16 flex items-center justify-between gap-2">
           <Logo href="/dashboard" size="md" />
 
-          <nav className="flex items-center gap-1 sm:gap-2">
+          <nav
+            className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto max-w-[60%] sm:max-w-none scrollbar-none"
+            aria-label="Workspace"
+          >
             <Link
               href="/dashboard"
-              className="text-[13px] text-zinc-400 hover:text-white px-3 py-1.5 rounded-full hover:bg-white/5 transition"
+              className="text-[12px] sm:text-[13px] text-zinc-400 hover:text-white px-2.5 sm:px-3 py-2 rounded-full hover:bg-white/5 transition whitespace-nowrap min-h-11 inline-flex items-center"
             >
               Dashboard
             </Link>
             <Link
               href="/validate"
-              className="text-[13px] text-zinc-400 hover:text-white px-3 py-1.5 rounded-full hover:bg-white/5 transition"
+              className="text-[12px] sm:text-[13px] text-zinc-400 hover:text-white px-2.5 sm:px-3 py-2 rounded-full hover:bg-white/5 transition whitespace-nowrap min-h-11 inline-flex items-center"
             >
               Validate
             </Link>
             <Link
               href="/workshop"
-              className="text-[13px] text-zinc-400 hover:text-white px-3 py-1.5 rounded-full hover:bg-white/5 transition"
+              className="text-[12px] sm:text-[13px] text-zinc-400 hover:text-white px-2.5 sm:px-3 py-2 rounded-full hover:bg-white/5 transition whitespace-nowrap min-h-11 inline-flex items-center"
             >
               Workshop
             </Link>
             <Link
               href="/"
-              className="text-[13px] text-zinc-500 hover:text-zinc-300 px-3 py-1.5 rounded-full transition hidden sm:inline"
+              className="text-[12px] sm:text-[13px] text-zinc-500 hover:text-zinc-300 px-2.5 sm:px-3 py-2 rounded-full transition whitespace-nowrap hidden md:inline-flex min-h-11 items-center"
             >
               Home
             </Link>
@@ -41,7 +44,7 @@ export default function AppLayout({
         </div>
       </header>
 
-      <main>{children}</main>
+      <main className="flex-1 safe-pb">{children}</main>
     </div>
   )
 }

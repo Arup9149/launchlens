@@ -1,15 +1,68 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+  display: "swap",
+  preload: true,
 })
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ||
+  "https://launchlens.ai"
+
 export const metadata: Metadata = {
-  title: "LaunchLens",
-  description: "Validate → Polish → Expand → Architect",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "LaunchLens — Know before you build",
+    template: "%s · LaunchLens",
+  },
+  description:
+    "Validate startup ideas with AI, then polish, expand, and architect your MVP in one founder workspace.",
+  applicationName: "LaunchLens",
+  keywords: [
+    "startup validation",
+    "idea validation",
+    "founder tools",
+    "MVP architecture",
+    "LaunchLens",
+  ],
+  authors: [{ name: "LaunchLens" }],
+  creator: "LaunchLens",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteUrl,
+    siteName: "LaunchLens",
+    title: "LaunchLens — Know before you build",
+    description:
+      "Validate → Polish → Expand → Architect. AI-powered founder workspace for early-stage builders.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LaunchLens — Know before you build",
+    description:
+      "Validate startup ideas with AI, then polish, expand, and architect your MVP.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: "/",
+  },
+}
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#05050a" },
+    { media: "(prefers-color-scheme: light)", color: "#05050a" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 }
 
 export default function RootLayout({
@@ -20,9 +73,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${inter.variable} antialiased min-h-screen text-zinc-100 bg-[#05050a]`}
+        className={`${inter.variable} font-sans antialiased min-h-screen text-zinc-100 bg-[#05050a] overflow-x-hidden`}
       >
-        {/* Fixed atmosphere — always visible */}
+        <a href="#main-content" className="skip-link">
+          Skip to content
+        </a>
+
         <div
           aria-hidden
           className="pointer-events-none fixed inset-0 -z-10"
@@ -52,7 +108,7 @@ export default function RootLayout({
           }}
         />
 
-        {children}
+        <div id="main-content">{children}</div>
       </body>
     </html>
   )
