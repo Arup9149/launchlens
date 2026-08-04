@@ -1,0 +1,6 @@
+export * from "./types"
+export * from "./config"
+export * from "./personalize"
+export { sendEmail } from "./send"
+export { renderWaitlistWelcome } from "./templates/waitlist-welcome"
+export { getEmailProvider } from "./providers/registry"
