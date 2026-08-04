@@ -23,7 +23,7 @@ function openPrintWindow(title: string, bodyHtml: string) {
     alert("Allow pop-ups to download the Founder workbook (Print → Save as PDF).")
     return
   }
-  w.document.write(`<!DOCTYPE html><html><head><meta charset=\"utf-8\"/>
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"/>
 <title>${esc(title)}</title>
 <style>
   @page { margin: 18mm; }
