@@ -39,15 +39,20 @@ export default function ValidatePage() {
 
   useEffect(() => {
     const e = email.trim().toLowerCase()
-    if (!e.includes("@")) {
-      setCredits(null)
-      return
-    }
-    localStorage.setItem("ll_email", e)
-    fetch(`/api/credits?email=${encodeURIComponent(e)}`)
-      .then((r) => r.json())
-      .then((d) => setCredits(typeof d.credits === "number" ? d.credits : 0))
-      .catch(() => setCredits(0))
+    if (e.includes("@")) localStorage.setItem("ll_email", e)
+    fetch("/api/credits")
+      .then((r) => {
+        if (r.status === 401) {
+          setCredits(null)
+          return null
+        }
+        return r.json()
+      })
+      .then((d) => {
+        if (!d) return
+        setCredits(typeof d.credits === "number" ? d.credits : 0)
+      })
+      .catch(() => setCredits(null))
   }, [email])
 
   const loadRazorpayScript = () => {
@@ -64,37 +69,36 @@ export default function ValidatePage() {
     })
   }
 
-  const grantCredits = async (userEmail: string) => {
-    try {
-      await fetch("/api/credits", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: userEmail,
-          action: "grant",
-          amount: 2,
-          plan: "early_bird",
-        }),
-      })
-    } catch (err) {
-      console.error("Grant credits failed", err)
-    }
-  }
-
-  const useCredit = async (userEmail: string) => {
+  const useCredit = async () => {
     const res = await fetch("/api/credits", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: userEmail,
-        action: "use",
-      }),
+      body: JSON.stringify({ action: "use" }),
     })
     const data = await res.json()
     if (!res.ok) {
       throw new Error(data.error || "No validations remaining")
     }
     setCredits(typeof data.credits === "number" ? data.credits : 0)
+    return data
+  }
+
+  /** Server verifies Razorpay signature and grants credits (no client grant). */
+  const verifyPayment = async (response: {
+    razorpay_order_id: string
+    razorpay_payment_id: string
+    razorpay_signature: string
+  }) => {
+    const res = await fetch("/api/payments/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(response),
+    })
+    const data = await res.json()
+    if (!res.ok) {
+      throw new Error(data.error || "Payment verification failed")
+    }
+    setCredits(typeof data.credits === "number" ? data.credits : null)
     return data
   }
 
@@ -147,9 +151,13 @@ export default function ValidatePage() {
     setStatus("Checking your founder credits…")
 
     try {
-      const creditRes = await fetch(
-        `/api/credits?email=${encodeURIComponent(userEmail)}`
-      )
+      const creditRes = await fetch("/api/credits")
+      if (creditRes.status === 401) {
+        alert("Sign in to validate and unlock Early Bird credits.")
+        setLoading(false)
+        setStatus("")
+        return
+      }
       const creditData = await creditRes.json()
       const remaining =
         typeof creditData.credits === "number" ? creditData.credits : 0
@@ -217,13 +225,28 @@ export default function ValidatePage() {
           description: "Early Bird · 2 validations · ₹799",
           order_id: orderData.orderId,
           prefill: { email: userEmail },
-          handler: async function () {
-            await grantCredits(userEmail)
+          handler: async function (rzpResponse: {
+            razorpay_order_id: string
+            razorpay_payment_id: string
+            razorpay_signature: string
+          }) {
             try {
-              await useCredit(userEmail)
-            } catch {}
-            unlockGuides()
-            goToResult(analysis, score, verdict, confidence, validationId)
+              setStatus("Confirming payment…")
+              await verifyPayment(rzpResponse)
+              try {
+                await useCredit()
+              } catch {}
+              unlockGuides()
+              goToResult(analysis, score, verdict, confidence, validationId)
+            } catch (err: any) {
+              console.error(err)
+              alert(
+                err.message ||
+                  "Payment could not be confirmed. Contact support with your payment id."
+              )
+              setLoading(false)
+              setStatus("")
+            }
           },
           theme: { color: "#7c3aed" },
           modal: {
@@ -241,7 +264,7 @@ export default function ValidatePage() {
 
       if (hasCredit && !skipPayment) {
         setStatus("Using 1 validation credit…")
-        await useCredit(userEmail)
+        await useCredit()
       }
 
       setStatus("Running your idea through the Brain…")
@@ -373,8 +396,8 @@ export default function ValidatePage() {
             {skipPayment
               ? "Dev · Brain report only"
               : credits && credits > 0
-              ? "Using 1 credit · no payment"
-              : "₹799 unlocks 2 credits + guides"}
+                ? "Using 1 credit · no payment"
+                : "₹799 unlocks 2 credits + guides"}
           </p>
           <button
             type="submit"
