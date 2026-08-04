@@ -4,33 +4,41 @@ Newest entries first.
 
 ---
 
-## 2026-08-04 — Sprint A (Founder Experience) + Sprint B (Brand Trust)
+## 2026-08-04 — Launch Readiness Sprint 2 (C/D/E)
 
 **Agent:** Grok (xAI) — Lead Software Architect  
-**Scope:** Waitlist UX, validate status copy, email design system, launch checklist  
-**Excluded:** Production DNS configuration
+**Scope:** Responsive polish, performance defaults, SEO/a11y, launch audit fixes  
+**Architecture:** Frozen
 
-### Sprint A — Founder Experience
-- Premium waitlist form: loading “Securing your seat…”, success / already-on-list cards, founder-focused errors
-- Validate page status strings refined (credits, Brain, checkout, report)
+### Sprint C — Responsive
+- Safe-area padding helpers; overflow-x containment
+- Navbar/app nav touch targets (~44px), mobile CTA label, scrollable workspace nav
+- Logo tagline hidden below 360px width to prevent header clip
+- Auth screens: full viewport height + safe padding
+- Production `not-found` page
 
-### Sprint B — Brand Trust
-- `src/lib/email/brand.ts` — shared email shell + design tokens
-- Waitlist welcome template uses shell (consistent mark, tagline, footer)
-- Sender remains 100% env-driven (`EMAIL_FROM_*`); docs prepare `team@launchlens.ai` without hardcoding
-- `docs/LAUNCH_CHECKLIST.md` added
+### Sprint D — Performance
+- Inter `display: swap` + preload
+- `next.config`: `compress`, `poweredByHeader: false`, strict mode
+- `prefers-reduced-motion` respect in CSS
 
-### Verification
-- `npm run build` green before push
+### Sprint E / SEO / a11y
+- Metadata: title template, description, OG, Twitter, robots, canonical via `metadataBase`
+- `src/app/robots.ts`, `src/app/sitemap.ts`
+- Skip-to-content link; `:focus-visible` rings; nav `aria-label`s
+- Sign-out redirect fixed → `/auth/login`
+
+### Not changed
+- Payment/auth architecture, Brain providers, Stripe stub
 
 ---
 
-## 2026-08-04 — Waitlist confirmation email + logo tagline
+## 2026-08-04 — Sprint A/B
 
-Email provider abstraction (Resend), welcome template, logo tagline.
+Founder waitlist UX, email design system, LAUNCH_CHECKLIST.
 
 ---
 
-## 2026-08-04 — Deploy hardening + global payments + auth branding
+## Prior
 
-Env guards, payment abstraction, LaunchLens-branded auth UI.
+Waitlist email, payments abstraction, auth branding, deploy hardening.

@@ -1,99 +1,73 @@
 # LaunchLens — Launch Checklist
 
-**Purpose:** Pre-flight list for a public Early Access / Early Bird launch.  
-**Scope:** Product readiness, messaging, email, payments, and host config.  
-**Out of scope here:** Production DNS cutover steps (document only; do not block on DNS).
-
-Last updated: 2026-08-04
+**Last updated:** 2026-08-04 (Sprint 2)
 
 ---
 
 ## 1. Brand & founder experience
 
-- [ ] Logo shows tagline **Know before you build.** on marketing, app shell, and auth
-- [ ] Waitlist success state is premium (not a generic button label)
-- [ ] Validate loading / error copy is founder-focused
-- [ ] Auth UI has no provider names (Supabase hidden)
+- [x] Logo tagline **Know before you build.** (hidden &lt;360px to avoid clip)
+- [x] Waitlist premium success / duplicate states
+- [x] Validate founder-focused loading copy
+- [x] Auth UI without provider names
 
 ---
 
-## 2. Environment (Vercel / host)
+## 2. Responsive & a11y (Sprint C/E)
 
-### Always required for data features
-
-- [ ] `NEXT_PUBLIC_SUPABASE_URL`
-- [ ] `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- [ ] `NEXT_PUBLIC_APP_URL` = production URL
-
-### Brain (cloud)
-
-- [ ] `OPENROUTER_API_KEY` (Vercel cannot reach local Ollama)
-- [ ] `BRAIN_PROVIDER=auto` or `openrouter`
-
-### India payments (if charging)
-
-- [ ] `NEXT_PUBLIC_RAZORPAY_KEY_ID`
-- [ ] `RAZORPAY_KEY_SECRET`
-- [ ] Test mode order creates successfully
-
-### Email (waitlist welcome)
-
-- [ ] `EMAIL_PROVIDER=resend`
-- [ ] `EMAIL_FROM_NAME=LaunchLens`
-- [ ] `EMAIL_FROM_ADDRESS` set to a **currently verified** sender  
-  - Local / pre-DNS: `onboarding@resend.dev` (or domain already verified in Resend)  
-  - Post-DNS (later): `team@launchlens.ai` — **env-only change, no code change**
-- [ ] `RESEND_API_KEY`
-- [ ] Optional: `EMAIL_REPLY_TO`
-
-**Note:** Do **not** hardcode `team@launchlens.ai` in the repo. DNS verification is a separate ops step; the app is ready to use that address via env when DNS is done.
+- [x] Safe-area / overflow-x / touch targets on primary navs
+- [x] Skip link + focus-visible
+- [x] Custom 404
+- [ ] Manual device matrix sign-off (desktop / tablet / mobile / landscape) on production URL
+- [ ] Screen-reader pass on waitlist + validate (human)
 
 ---
 
-## 3. Functional smoke (production URL)
+## 3. SEO (Sprint E)
 
-- [ ] `/` loads; Early Access form works
-- [ ] Waitlist insert appears in Supabase `waitlist`
-- [ ] Welcome email appears in Resend dashboard (Delivered)
-- [ ] `GET /api/brain/health` reports expected engine
-- [ ] `/auth/signup` + `/auth/login` work
-- [ ] `/validate` with credits or skip-payment path produces a report
-- [ ] `/workshop` pages load
+- [x] Title / description / OG / Twitter metadata
+- [x] `robots.ts` + `sitemap.ts`
+- [x] Favicon present (`src/app/favicon.ico`)
+- [ ] Confirm `NEXT_PUBLIC_APP_URL` matches production domain (canonical)
 
 ---
 
-## 4. Payments honesty
+## 4. Environment
 
-- [ ] India: Razorpay checkout opens with catalog amount
-- [ ] International: quote shows local currency; Stripe charge path still stub (503) until P0-5
-- [ ] Do not advertise “global card checkout live” until Stripe adapter ships
-
----
-
-## 5. Security (pre-scale)
-
-- [ ] RLS planned / applied for `validations` and `founder_credits` (see DATABASE.md)
-- [ ] Known gap: client-side credit grant after Razorpay — webhook is P0-1
-- [ ] `NEXT_PUBLIC_SKIP_PAYMENT` is **false** in production
+- [ ] `NEXT_PUBLIC_SUPABASE_URL` / `ANON_KEY`
+- [ ] `NEXT_PUBLIC_APP_URL`
+- [ ] `OPENROUTER_API_KEY` (prod Brain)
+- [ ] Razorpay pair if charging IN
+- [ ] `RESEND_API_KEY` + `EMAIL_FROM_*`
+- [ ] `NEXT_PUBLIC_SKIP_PAYMENT=false` in production
 
 ---
 
-## 6. Build & deploy
+## 5. Functional smoke
 
-- [ ] `npm run build` green on CI / local
-- [ ] Vercel project root = repo root (not nested `launchlens/`)
-- [ ] Node 20+
-- [ ] Redeploy after any env change to `NEXT_PUBLIC_*`
+- [ ] Landing → waitlist → email (Resend)
+- [ ] Signup → login → dashboard
+- [ ] Validate (credit or pay path)
+- [ ] Workshop polish
+- [ ] Logout → login again
+- [ ] Payment failure / dismiss path
+- [ ] Slow network (throttle) — pages remain usable
 
 ---
 
-## 7. Post-DNS (ops only — not required for this sprint)
+## 6. Known blockers before public launch
 
-When `launchlens.ai` is verified in Resend:
+| Item | Severity | Notes |
+|------|----------|--------|
+| Razorpay webhook / server credit grant | **P0** | Client-only grant is spoofable |
+| Auth-scoped validations & credits + RLS | **P0** | Email-keyed identity |
+| Stripe international checkout | **P1** | Stub only; do not market as live |
+| `/api/razorpay/guide` missing | **P1** | Architecture UI may reference it |
+| Profile / account settings | **N/A** | Not shipped — out of scope |
+| Architecture/related Ollama-only | **P1** | Cloud-only deploys limited |
 
-1. Set `EMAIL_FROM_ADDRESS=team@launchlens.ai`
-2. Set `EMAIL_FROM_NAME=LaunchLens`
-3. Redeploy
-4. Send one test waitlist signup to a real inbox
+---
 
-No application code change required.
+## 7. Post-DNS (ops)
+
+Set `EMAIL_FROM_ADDRESS=team@launchlens.ai` after Resend domain verify — no code change.
