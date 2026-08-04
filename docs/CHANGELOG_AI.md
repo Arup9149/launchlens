@@ -5,6 +5,38 @@ Newest entries first.
 
 ---
 
+## 2026-08-04 — Global payment abstraction (Razorpay IN + Stripe ROW)
+
+**Agent:** Grok (xAI) — Lead Software Architect  
+**Scope:** Payment domain layer + APIs + docs (Stripe charge path not implemented)
+
+### Actions
+
+1. Added `src/lib/payments/`:
+   - `types.ts` — `PaymentProvider`, quotes, orders  
+   - `catalog.ts` — Early Bird / plans in INR·USD·EUR·GBP minor units  
+   - `region.ts` — country → currency + provider (IN→Razorpay, else→Stripe)  
+   - `providers/razorpay.ts` — live adapter  
+   - `providers/stripe.ts` — registered stub (`PROVIDER_NOT_CONFIGURED` / `NOT_IMPLEMENTED`)  
+   - `providers/registry.ts` — extensible registry  
+   - `index.ts` — `getQuote()`, `createPaymentOrder()`  
+2. Added `GET /api/payments/quote` and `POST /api/payments/order`.  
+3. Refactored `POST /api/razorpay/order` to call `createPaymentOrder` (INR forced).  
+4. Documented strategy in ARCHITECTURE, API_REFERENCE, ROADMAP, PROJECT_STATUS.
+
+### Application code
+
+- **Added:** payment domain + payments API routes  
+- **Modified:** legacy Razorpay order route (behavior preserved for IN)  
+- **Not done:** Stripe PaymentIntent, webhooks, validate UI currency wiring
+
+### Notes
+
+- Product/business logic must not import gateway SDKs; use `@/lib/payments`.  
+- Next cycle: Stripe implementation behind the same interface + webhook fulfillment.
+
+---
+
 ## 2026-08-04 — LaunchLens-branded authentication UI
 
 **Agent:** Grok (xAI) — Lead Software Architect  
@@ -12,71 +44,18 @@ Newest entries first.
 
 ### Actions
 
-1. Updated `/auth/login` — Logo, "Welcome back to LaunchLens", founder-focused subheading, "Sign In" CTA, forgot-password link, friendly error mapping (no provider names in UI).
-2. Updated `/auth/signup` — Logo, "Create your LaunchLens account", "Start validating startup ideas with AI.", "Create Account" CTA; post-signup redirect to verify page when session not immediate.
-3. Added `/auth/forgot-password` — "Reset your password" / "We'll help you get back into LaunchLens."
-4. Added `/auth/verify-email` — "Verify your email" / "Confirm your email address to activate your LaunchLens workspace."
-5. Auth logic, routes for login/signup/signout, and Supabase client integration **unchanged** (still `signInWithPassword` / `signUp` / `resetPasswordForEmail`).
+- Login/signup LaunchLens copy + Logo; forgot-password + verify-email pages  
+- Friendly errors; no provider names in UI  
 
 ### Application code
 
-- Modified: `src/app/auth/login/page.tsx`, `src/app/auth/signup/page.tsx`
-- Added: `src/app/auth/forgot-password/page.tsx`, `src/app/auth/verify-email/page.tsx`
-
-### Verification
-
-- No user-visible "Supabase" strings on auth pages (provider remains in import paths / server env only).
-- Glass + Logo visual identity consistent with product shell.
+- Modified auth pages; added forgot-password + verify-email  
 
 ---
 
-## 2026-08-03 — Architect session bootstrap: complete docs suite
+## 2026-08-03 — Architect docs suite + full repository index
 
-**Agent:** Grok (xAI) — Lead Software Architect role  
-**Scope:** Documentation only (no application code)
-
-### Actions
-
-1. Session start protocol: listed `docs/`, latest commits on `main` (`aaba822` HEAD).  
-2. Compared required docs structure vs repository.  
-3. **Created missing documents** and committed to `docs/`:
-   - `ENGINEERING_RULES.md` — coding, ownership, security, git, governance  
-   - `API_REFERENCE.md` — live App Router endpoints  
-   - `DATABASE.md` — inferred schema + RLS guidance  
-   - `DEPLOYMENT.md` — env, local, Vercel, smoke checklist  
-   - `ROADMAP.md` — Horizons A–D aligned with NEXT_TASKS  
-4. Existing six docs remain authoritative for status/architecture/features.
-
-### Application code
-
-**Not modified.**
-
-### Notes
-
-- Architecture remains frozen pending explicit product approval for structural change.  
-- Next implementation should follow NEXT_TASKS P0/P2 hygiene or security items with a written what/why/files/risks/verification plan.
-
----
-
-## 2026-08-03 — Full repository index + documentation pack
-
-**Agent:** Grok (xAI) via GitHub connector  
-**Scope:** Read-only inspection of application code; documentation added under `docs/`
-
-### Actions
-
-1. Recursive tree of `Arup9149/launchlens` (`main`).  
-2. Read all meaningful source, config, and documentation files.  
-3. Explicitly noted non-source bulk: committed `launchlens/.next/**`, `src1.zip`, dead `src/api/**`.  
-4. Authored initial documentation pack under `docs/`.
-
-### Application code
-
-**Not modified.**
-
-### Follow-up
-
-See `docs/NEXT_TASKS.md`. Prefer P0 security/payment fixes before new features.
+Documentation pack under `docs/` (status, architecture, inventory, handoff, tasks, engineering rules, API, database, deployment, roadmap). Initial index of application code; no app logic changes in the docs-only commits.
 
 ---
 

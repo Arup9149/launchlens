@@ -1,79 +1,71 @@
 # LaunchLens — Next Tasks
 
-Prioritized backlog derived from full repo index (2026-08-03).  
-Does **not** change application code by itself — tracking only.
+Prioritized backlog. Last updated 2026-08-04.
 
 ---
 
 ## P0 — Correctness & security
 
-| ID | Task | Why | Acceptance criteria |
-|----|------|-----|---------------------|
-| P0-1 | Add Razorpay **webhook** (or verified server callback) and grant credits only after signature verification | Credits currently granted in client `handler` after checkout | Server verifies payment; client cannot grant credits alone |
-| P0-2 | Scope `validations` + `founder_credits` to authenticated user (or strict RLS) | List/insert/mutate use anon client; global leakage risk | Unauthenticated cannot list others’ validations or burn others’ credits |
-| P0-3 | Fix or remove Architecture **₹200 guide** checkout | UI calls `/api/razorpay/guide` which **does not exist** | Either working route + flow, or UI CTA removed/disabled |
-| P0-4 | Rate-limit `/api/analyze`, `/api/polish`, architecture, related | No auth/rate limit on expensive LLM routes | Abuse limited per IP or user |
+| ID | Task | Status |
+|----|------|--------|
+| P0-1 | Razorpay **webhook** + server-side credit grant | Open |
+| P0-2 | Scope validations/credits to auth user + RLS | Open |
+| P0-3 | Fix or remove `/api/razorpay/guide` | Open |
+| P0-4 | Rate-limit LLM routes | Open |
+| P0-5 | **Stripe PaymentIntent + webhook** behind `PaymentProvider` | Open (architecture ready) |
 
 ---
 
 ## P1 — Product consistency
 
-| ID | Task | Why | Acceptance criteria |
-|----|------|-----|---------------------|
-| P1-1 | Unify Brain provider for `/api/architecture` and `/api/related` with analyze/polish pattern | Ollama-only today; fails when only OpenRouter is configured | Same `BRAIN_PROVIDER` / auto fallback behavior |
-| P1-2 | Server-side guide entitlement (not only `localStorage`) | Guides unlock is client flag only | Purchase/credit plan controls access |
-| P1-3 | Fix sign-out redirect to `/auth/login` | Currently redirects to `/login` | Sign-out lands on real login page |
-| P1-4 | Optional: protect `(app)` routes behind auth **or** document intentional public access | Middleware refreshes session but does not enforce | Explicit product decision implemented |
-| P1-5 | Bind credits to `auth.users` id (email as display only) | Email-keyed credits are shareable/spoofable | Logged-in user owns balance |
+| ID | Task | Status |
+|----|------|--------|
+| P1-0 | Point validate + landing at `/api/payments/quote` (or shared catalog) for display | Open |
+| P1-1 | Unify Brain provider for architecture + related | Open |
+| P1-2 | Server-side guide entitlement | Open |
+| P1-3 | Fix sign-out redirect → `/auth/login` | Open |
+| P1-4 | Gate `(app)` routes or document public access | Open |
+| P1-5 | Bind credits to `auth.users` | Open |
 
 ---
 
-## P2 — Maintainability & hygiene
+## P2 — Maintainability
 
-| ID | Task | Why | Acceptance criteria |
-|----|------|-----|---------------------|
-| P2-1 | Remove committed `launchlens/.next/**` and `src1.zip` from git; ensure `.gitignore` covers them | Bloat; violates standard Next ignores | Paths gone from tree; ignore works |
-| P2-2 | Delete dead `src/api/**` tree | Not App Router; confuses agents and humans | Only `src/app/api/**` remains for HTTP handlers |
-| P2-3 | Replace root `README.md` with real setup (env, Ollama, Supabase tables, Razorpay, skip payment) | Current README is create-next-app template | New contributor can run locally from README |
-| P2-4 | Add `.env.example` (no secrets) | No env template in repo | Example lists all required vars |
-| P2-5 | Extract shared Brain helpers (`runBrain`, `parseJson`, clamp, prompts module) | Duplicated across analyze/polish (and should cover architecture/related) | Single module; routes thin |
-| P2-6 | Document Supabase schema (SQL or migration notes) in `docs/` | Tables only implied by inserts | Schema doc matches code |
-
----
-
-## P3 — Growth & quality
-
-| ID | Task | Why | Acceptance criteria |
-|----|------|-----|---------------------|
-| P3-1 | Multi-currency / Stripe path for US-EU | Landing shows $ / € but order is always INR 79900 | Non-IN checkout works or pricing UI matches reality |
-| P3-2 | Builder Pass / Pro Launch real checkout | Marketing cards only | Plans grant correct credit amounts |
-| P3-3 | Minimal tests (API analyze mock + credits grant/use) | No test suite | CI or local `npm test` covers core |
-| P3-4 | GitHub Actions lint + typecheck | No CI observed | PR runs lint/tsc |
-| P3-5 | Persist polish / architecture outputs (optional) | Client-only today | Saved against validation or user |
-| P3-6 | Navbar region-aware Early Bird CTA | Hardcoded ₹799 | Matches selected region |
+| ID | Task | Status |
+|----|------|--------|
+| P2-1 | Remove `.next` / `src1.zip` from git; fix gitignore | Open |
+| P2-2 | Delete dead `src/api/**` | Open |
+| P2-3 | Real README | Open |
+| P2-4 | `.env.example` (include Stripe placeholders) | Open |
+| P2-5 | Shared Brain helpers | Open |
+| P2-6 | Schema doc / migrations | Open |
 
 ---
 
-## Suggested sequence for next coding session
+## P3 — Growth
 
-1. **P2-1, P2-2** — hygiene (safe, no behavior change if careful)  
-2. **P0-3** — stop broken guide CTA or implement route  
-3. **P1-3** — one-line redirect fix  
-4. **P1-1** — Brain provider parity  
-5. **P0-1, P0-2** — payment + authz (largest product risk)  
-6. **P2-3, P2-4, P2-6** — docs for humans  
-
----
-
-## Out of scope until asked
-
-- Redesign of landing or brand  
-- New AI product features beyond fixing provider parity  
-- Mobile native apps  
-- Changing Early Bird price without product decision  
+| ID | Task | Status |
+|----|------|--------|
+| P3-1 | Builder / Pro live checkout via payments abstraction | Open |
+| P3-2 | Optional PayPal / Lemon Squeezy / Paddle adapters | Open |
+| P3-3 | Tests + CI | Open |
 
 ---
 
-## Tracking
+## Done recently
 
-When completing a task, append a short note to `CHANGELOG_AI.md` and strike or move the row here.
+| ID | Task |
+|----|------|
+| — | Payment provider interface, catalog, region routing |
+| — | `GET /api/payments/quote`, `POST /api/payments/order` |
+| — | Razorpay adapter + legacy route wrap |
+| — | Stripe provider **stub** registered |
+| — | Auth UI LaunchLens branding |
+
+---
+
+## Suggested next coding session
+
+1. **P0-5** Stripe `createOrder` (PaymentIntent) using existing `stripe` package + env keys  
+2. **P0-1** Razorpay webhook verification  
+3. **P1-0** Validate page: fetch quote, show `display`, call `/api/payments/order`, branch checkout UI on `provider` only  

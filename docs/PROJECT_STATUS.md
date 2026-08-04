@@ -4,44 +4,32 @@
 **Last status update:** 2026-08-04  
 **Branch:** `main`  
 **Version (package.json):** `0.1.0`  
-**Status:** Early-stage MVP / pre-product-market-fit product surface
+**Status:** Early-stage MVP — global payment **architecture** in place; India checkout live via Razorpay; international Stripe **not yet charging**
 
 ---
 
 ## 1. What the product is
 
-**LaunchLens** is a founder workspace that walks indie builders through:
+**LaunchLens** is a founder workspace: Validate → Polish → Expand → Architect, with an LLM Brain and Early Bird monetization.
 
-1. **Validate** — AI “Brain” produces Go / Pivot / Kill report with score, demand, competition, risks, next steps  
-2. **Polish** — refine problem, ICP, wedge, pricing  
-3. **Expand** — generate related / adjacent ideas  
-4. **Architect** — MVP modules, tech stack, system flow, 30-day plan  
-
-Monetization centers on an **Early Bird** pack (₹799 / ~$9 / ~€9): 2 validation credits + starter guides + Workshop access. Optional local **Ollama** brain or cloud **OpenRouter**.
+**Pricing (catalog):** Early Bird ≈ ₹799 / $9 / €9 / £9 · 2 validation credits + guides + Workshop.
 
 ---
 
-## 2. Tech stack (as implemented)
+## 2. Tech stack
 
 | Layer | Choice |
 |--------|--------|
-| Framework | Next.js **16.2.11** (App Router) |
-| UI | React **19.2.4**, Tailwind CSS **v4**, shadcn/ui (radix-nova style) |
-| Auth / DB | Supabase (`@supabase/ssr`, `@supabase/supabase-js`) — **not shown in product UI** |
-| Payments | Razorpay (primary); Stripe listed in deps but not wired in routes reviewed |
-| AI | OpenRouter (default cloud) + Ollama `qwen2.5:7b` (local / fallback) |
-| Validation | Zod in deps (light usage in app code) |
-| Motion / icons | framer-motion, lucide-react |
+| Framework | Next.js 16 App Router |
+| UI | React 19, Tailwind v4, shadcn |
+| Auth / DB | Supabase (hidden in product UI) |
+| **Payments** | **Abstraction in `src/lib/payments`** — Razorpay (IN, live), Stripe (ROW, stub) |
+| AI | OpenRouter + Ollama |
 
-**Env vars expected (inferred):**
+**Payment env (current + reserved):**
 
-- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `OPENROUTER_API_KEY`, optional `OPENROUTER_MODEL`, `BRAIN_PROVIDER` (`auto` \| `openrouter` \| `ollama`)
-- `NEXT_PUBLIC_APP_URL`
-- `NEXT_PUBLIC_RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`
-- `NEXT_PUBLIC_SKIP_PAYMENT` (dev bypass)
-
-**Supabase tables referenced:** `waitlist`, `validations`, `founder_credits`
+- `NEXT_PUBLIC_RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`  
+- `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (reserved; not required until Stripe ships)
 
 ---
 
@@ -49,63 +37,48 @@ Monetization centers on an **Early Bird** pack (₹799 / ~$9 / ~€9): 2 validat
 
 | Area | State | Notes |
 |------|--------|--------|
-| Landing + pricing / region detection | Working UI | Region via language/timezone; prices hardcoded |
-| Waitlist | Implemented | Inserts into Supabase `waitlist` |
-| Auth (login / signup / signout) | **Branded** | LaunchLens Logo + copy; no provider names in UI |
-| Forgot password | Implemented | `/auth/forgot-password` |
-| Email verification screen | Implemented | `/auth/verify-email` |
-| Validate flow + payment gate | Implemented | Razorpay ₹799; credits grant/use; sessionStorage + DB save |
-| Validation report | Implemented | Expandable sections, print-to-PDF, handoff to Workshop |
-| Dashboard | Implemented | Credits panel, recent validations, brain health |
-| Workshop hub | Implemented | Links to polish / related / architecture / timer |
-| Polish Garage | Implemented | Brain polish API |
-| Related ideas | Implemented | Ollama-only API in current code |
-| Architecture Brain | Implemented | Ollama-only; rich blueprint UI |
-| Builder Timer | Implemented | Client-only Pomodoro-style timer |
-| Early Bird guides | Static content | Starter + Do’s & Don’ts; unlock flag in localStorage |
-| Credits system | Implemented | Email-keyed, not auth-user-keyed |
-| Brain health | Implemented | OpenRouter + Ollama probe |
-| README | **Stale** | Still default create-next-app boilerplate |
-| CI / tests | **None observed** | No test scripts beyond `lint` |
-| Production auth gating | **Weak** | Middleware only refreshes session; does not enforce login |
+| Landing region price labels | Working UI | Client detect; should adopt shared catalog/quote |
+| Auth UI | Branded | LaunchLens-only copy |
+| Validate + Razorpay (IN) | Live path | Still client-side credit grant |
+| **Payment domain layer** | **Done** | types, catalog, region, registry |
+| **Quote / order APIs** | **Done** | `/api/payments/quote`, `/api/payments/order` |
+| Stripe checkout | **Stub** | Routes to Stripe; returns 503 until implemented |
+| Payment webhooks | **Missing** | P0 |
+| Workshop / Brain | Implemented | Architecture/related Ollama-only |
+| Credits | Email-keyed | Not auth-user-keyed |
+| README | Stale | — |
 
 ---
 
-## 4. Repository hygiene issues
+## 4. Global payments strategy (summary)
 
-- **`.next` build output committed** under `launchlens/.next/` (and related chunks).  
-- **`src1.zip`** committed at repo root.  
-- **Duplicate / dead API tree:** `src/api/...`  
-- Sign-out redirects to `/login` but login lives at `/auth/login`.  
-- Architecture page calls **`/api/razorpay/guide`** — route missing.  
-- Stripe dependency unused in routes reviewed.  
-- Navbar hardcodes “Early Bird · ₹799”.
+- **India → Razorpay / INR**  
+- **International → Stripe / USD·EUR·GBP** (display + routing ready; charge flow next)  
+- Additional providers plug into `providers/registry.ts` without changing validate/business rules  
+- Legacy `/api/razorpay/order` remains as a thin wrapper  
 
 ---
 
-## 5. Security / correctness risks (high level)
+## 5. Risks (high level)
 
-- Many API routes use **anon Supabase client** with **no auth check**.  
-- Credits identified by **email**, not session user.  
-- Payment success grants credits in **client handler** (no webhook).  
-- AI routes have no rate limiting or auth in code reviewed.
-
----
-
-## 6. Recommended next engineering priorities
-
-1. Remove committed `.next`, `src1.zip`, and dead `src/api/**` tree.  
-2. Document real setup in README.  
-3. RLS + authenticated server clients; bind credits to `auth.users`.  
-4. Razorpay webhook + signature verification.  
-5. Unify Brain provider for architecture/related.  
-6. Implement or remove `/api/razorpay/guide`.  
-7. Protect `(app)` routes behind auth.  
-8. Fix sign-out redirect to `/auth/login`.  
-9. Minimal tests for analyze + credits + payment.
+- Client-only payment fulfillment  
+- Open validations/credits APIs without strong RLS  
+- International users see price but cannot complete Stripe checkout yet  
+- Validate CTA still emphasizes ₹ in several strings  
 
 ---
 
-## 7. Overall assessment
+## 6. Next engineering priorities
 
-MVP product surface is largely built. Auth UI now presents **LaunchLens-only** branding. Remaining gaps are production readiness (authz, payment verification, repo hygiene) rather than primary founder-facing flows.
+1. Implement Stripe `createOrder` (PaymentIntent) + webhook credit grant  
+2. Razorpay webhook; stop relying on client grant alone  
+3. Point validate + landing at `/api/payments/quote` for display  
+4. RLS + auth-bound credits  
+5. Repo hygiene + README  
+6. Brain provider parity  
+
+---
+
+## 7. Assessment
+
+Product surface remains an end-to-end founder MVP. Payment **architecture is global-first**; **India can charge today**; **rest-of-world is quote-ready and charge-blocked** until Stripe is implemented behind the same interface.
