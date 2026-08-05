@@ -12,6 +12,7 @@ type UpgradePanelProps = {
 /**
  * Shown when Early Founder allocation is exhausted (Beta).
  * Presentation only — does not invoke Razorpay.
+ * Notify Me → waitlist insert + optional confirmation email (never blocks UX).
  */
 export function UpgradePanel({ className = "", email = "" }: UpgradePanelProps) {
   const [notifyState, setNotifyState] = useState<
@@ -32,7 +33,11 @@ export function UpgradePanel({ className = "", email = "" }: UpgradePanelProps) 
       const res = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: value, name: "Builder Pass priority" }),
+        body: JSON.stringify({
+          email: value,
+          name: "Builder Pass priority",
+          source: "notify_me",
+        }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
@@ -56,7 +61,7 @@ export function UpgradePanel({ className = "", email = "" }: UpgradePanelProps) 
         ₹799 <span className="text-[14px] font-normal text-zinc-500">(Coming Soon)</span>
       </h2>
       <p className="text-[15px] text-zinc-400 leading-relaxed mb-5 max-w-xl">
-        You&apos;ve used all Founder Validations. Builder Pass launches soon.
+        You've used all Founder Validations. Builder Pass launches soon.
         Join the priority list to get notified.
       </p>
 
@@ -78,7 +83,7 @@ export function UpgradePanel({ className = "", email = "" }: UpgradePanelProps) 
       {(notifyState === "done" || notifyState === "duplicate") && (
         <p className="text-[14px] text-emerald-400 mb-4" role="status">
           {notifyState === "duplicate"
-            ? "You're already on the priority list."
+            ? "✓ You're already on the Builder Pass priority list."
             : "You're on the priority list. We'll email you when Builder Pass opens."}
         </p>
       )}
