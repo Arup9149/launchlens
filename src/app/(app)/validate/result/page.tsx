@@ -7,6 +7,7 @@ import {
   downloadBuilderProgram,
   downloadFounderPlaybook,
 } from "@/lib/pdf"
+import { RevenueSidebar } from "@/components/revenue"
 
 type Analysis = {
   idea: string
@@ -365,6 +366,16 @@ function ResultContent() {
           Back to Dashboard
         </Link>
       </div>
+
+      <RevenueSidebar
+        input={{
+          idea,
+          score,
+          confidence,
+          verdict,
+          breakdown,
+        }}
+      />
 
       <style jsx global>{`
         @media print {
