@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
+import { getAuthCallbackUrl } from "@/lib/supabase/auth-redirect"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Logo } from "@/components/logo"
@@ -35,6 +36,10 @@ export default function SignupPage() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        // Land on LaunchLens /auth/callback — never leave the product domain after verify
+        emailRedirectTo: getAuthCallbackUrl("/dashboard"),
+      },
     })
 
     if (error) {
