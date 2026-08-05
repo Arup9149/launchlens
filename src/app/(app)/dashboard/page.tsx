@@ -206,8 +206,11 @@ export default function DashboardPage() {
           onClick={() => {
             const name =
               validations[0]?.idea?.slice(0, 60) || "Your Startup"
-            void import("@/lib/founder-print").then((m) =>
-              m.printFounderPlaybook({ startupName: name, idea: validations[0]?.idea })
+            void import("@/lib/pdf").then((m) =>
+              m.PDFService.downloadFounderPlaybook({
+                startupName: name,
+                idea: validations[0]?.idea,
+              })
             )
           }}
           className="glass rounded-2xl p-5 hover:bg-white/[0.04] transition block text-left w-full"
@@ -217,7 +220,7 @@ export default function DashboardPage() {
           </p>
           <h3 className="text-[14px] font-medium mb-1.5">Founder Playbook</h3>
           <p className="text-[12px] text-zinc-500 leading-relaxed">
-            Personalized handbook — open print dialog to save as PDF.
+            Personalized handbook — one-click PDF download.
           </p>
         </button>
         <button
@@ -225,8 +228,11 @@ export default function DashboardPage() {
           onClick={() => {
             const name =
               validations[0]?.idea?.slice(0, 60) || "Your Startup"
-            void import("@/lib/founder-print").then((m) =>
-              m.printBuilderProgram({ startupName: name, idea: validations[0]?.idea })
+            void import("@/lib/pdf").then((m) =>
+              m.PDFService.downloadBuilderProgram({
+                startupName: name,
+                idea: validations[0]?.idea,
+              })
             )
           }}
           className="glass rounded-2xl p-5 hover:bg-white/[0.04] transition block text-left w-full"
@@ -236,7 +242,7 @@ export default function DashboardPage() {
           </p>
           <h3 className="text-[14px] font-medium mb-1.5">Launch in 20 Days</h3>
           <p className="text-[12px] text-zinc-500 leading-relaxed">
-            Personalized 20-day workbook — open print dialog to save as PDF.
+            Personalized 20-day workbook — one-click PDF download.
           </p>
         </button>
       </div>
