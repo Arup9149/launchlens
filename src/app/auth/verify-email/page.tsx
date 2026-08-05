@@ -40,7 +40,7 @@ function VerifyEmailContent() {
           <ul className="text-[13px] text-zinc-500 space-y-2 mb-8 list-disc list-inside">
             <li>The link may take a minute to arrive</li>
             <li>Check spam or promotions if you don't see it</li>
-            <li>After confirming, return here to sign in</li>
+            <li>After confirming, you'll continue on LaunchLens automatically</li>
           </ul>
 
           <div className="flex flex-col sm:flex-row gap-3">
