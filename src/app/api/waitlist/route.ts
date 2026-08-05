@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
-import { renderWaitlistWelcome, sendEmail } from "@/lib/email"
+import { emailService, renderWaitlistWelcome } from "@/lib/email"
+import type { EmailEventType } from "@/lib/email"
 
 export async function POST(request: Request) {
   try {
@@ -9,6 +10,16 @@ export async function POST(request: Request) {
       typeof body.email === "string" ? body.email.trim().toLowerCase() : ""
     const name =
       typeof body.name === "string" ? body.name.trim() : undefined
+    const source =
+      typeof body.source === "string" ? body.source.trim().toLowerCase() : ""
+
+    // notify_me (Builder Pass priority) vs waitlist early access
+    const eventType: EmailEventType =
+      source === "notify_me" ||
+      (typeof name === "string" &&
+        name.toLowerCase().includes("builder pass"))
+        ? "notify_me"
+        : "waitlist_welcome"
 
     if (!email || !email.includes("@")) {
       return NextResponse.json({ error: "Invalid email" }, { status: 400 })
@@ -43,6 +54,7 @@ export async function POST(request: Request) {
             level: "info",
             msg: "waitlist.duplicate",
             email,
+            type: eventType,
           })
         )
       } else {
@@ -51,6 +63,7 @@ export async function POST(request: Request) {
             level: "error",
             msg: "waitlist.insert_failed",
             email,
+            type: eventType,
             error: error.message,
             code: error.code,
           })
@@ -59,7 +72,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // Confirmation email — new joins only; failures logged, never fail the join
+    // Confirmation email — new joins only; failures logged, never fail the UX
     let emailSent = false
     let emailSkipped = false
     if (alreadyOnList) {
@@ -69,20 +82,23 @@ export async function POST(request: Request) {
           level: "info",
           msg: "waitlist.email_skipped_duplicate",
           email,
+          type: eventType,
+          status: "skipped",
         })
       )
     } else {
       try {
         const rendered = renderWaitlistWelcome({ email, name })
-        await sendEmail({
+        await emailService.send({
           to: email,
           subject: rendered.subject,
           html: rendered.html,
           text: rendered.text,
-          idempotencyKey: `waitlist-welcome:${email}`,
+          idempotencyKey: `${eventType}:${email}`,
           tags: {
-            category: "waitlist_welcome",
+            category: eventType,
           },
+          type: eventType,
         })
         emailSent = true
       } catch (err) {
@@ -97,6 +113,8 @@ export async function POST(request: Request) {
               level: "warn",
               msg: "waitlist.email_skipped_not_configured",
               email,
+              type: eventType,
+              status: "skipped",
               hint: "Set RESEND_API_KEY (and optional EMAIL_FROM_* overrides). MVP From defaults to LaunchLens <onboarding@resend.dev>.",
             })
           )
@@ -106,10 +124,13 @@ export async function POST(request: Request) {
               level: "error",
               msg: "waitlist.email_failed",
               email,
+              type: eventType,
+              status: "failed",
               error: err instanceof Error ? err.message : String(err),
             })
           )
         }
+        // Do NOT fail UX
       }
     }
 
@@ -118,9 +139,16 @@ export async function POST(request: Request) {
       alreadyOnList,
       emailSent,
       emailSkipped,
+      type: eventType,
     })
   } catch (err) {
-    console.error(err)
+    console.error(
+      JSON.stringify({
+        level: "error",
+        msg: "waitlist.unhandled",
+        error: err instanceof Error ? err.message : String(err),
+      })
+    )
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 })
   }
 }
