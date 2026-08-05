@@ -13,12 +13,12 @@ export function MarketOpportunity({
     {
       label: "Serviceable",
       value: market.sam,
-      pct: Math.round((market.sam / market.tam) * 100),
+      pct: Math.round((market.sam / Math.max(1, market.tam)) * 100),
     },
     {
       label: "Beachhead",
       value: market.beachhead,
-      pct: Math.round((market.beachhead / market.tam) * 100),
+      pct: Math.round((market.beachhead / Math.max(1, market.tam)) * 100),
     },
   ]
 
@@ -41,8 +41,8 @@ export function MarketOpportunity({
         </div>
       ))}
       <p className="text-[10px] text-zinc-600 leading-relaxed">
-        Market bands are scenario estimates derived from validation signals —
-        not measured market research.
+        <span className="text-zinc-500 font-medium">Why · </span>
+        {market.why}
       </p>
     </div>
   )

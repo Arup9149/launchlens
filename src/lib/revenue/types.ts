@@ -1,4 +1,4 @@
-export type RevenueScenarioKey = "conservative" | "expected" | "best"
+export type RevenueScenarioKey = "conservative" | "expected" | "aggressive"
 
 export type RevenueScenario = {
   key: RevenueScenarioKey
@@ -7,12 +7,15 @@ export type RevenueScenario = {
   monthly: number
   customers: number
   avgPriceMonthly: number
+  /** Why this scenario was estimated */
+  why: string
 }
 
 export type MarketBands = {
   tam: number
   sam: number
   beachhead: number
+  why: string
 }
 
 export type GeographyRank = {
@@ -51,9 +54,32 @@ export type CompetitionLevel = "Low" | "Medium" | "High"
 
 export type ConfidenceLevel = "Low" | "Medium" | "High"
 
+export type ConfidenceAxes = {
+  market: { level: ConfidenceLevel; score: number; why: string }
+  pricing: { level: ConfidenceLevel; score: number; why: string }
+  competition: { level: ConfidenceLevel; score: number; why: string }
+  monetization: { level: ConfidenceLevel; score: number; why: string }
+}
+
+export type RevenueKiller = {
+  title: string
+  severity: "High" | "Medium" | "Low"
+  why: string
+}
+
+export type FastestPath = {
+  title: string
+  steps: string[]
+  why: string
+}
+
+export type Milestone = {
+  id: string
+  label: string
+  hint: string
+}
+
 export type RevenueIntelligence = {
-  rangeLow: number
-  rangeHigh: number
   scenarios: RevenueScenario[]
   market: MarketBands
   geography: GeographyRank[]
@@ -62,7 +88,10 @@ export type RevenueIntelligence = {
   monetization: MonetizationIdea[]
   pricing: PricingTier
   competition: { level: CompetitionLevel; reason: string }
-  confidence: { level: ConfidenceLevel; reason: string }
+  confidenceAxes: ConfidenceAxes
+  revenueKiller: RevenueKiller
+  fastestPath: FastestPath
+  milestones: Milestone[]
   disclaimer: string
 }
 
