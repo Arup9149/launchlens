@@ -1,9 +1,12 @@
 # LaunchLens — Database
 
 **Provider:** Supabase (Postgres)  
-**Last reviewed:** 2026-08-04 (P0 Security)
+**Last reviewed:** 2026-08-05 (P0 Production Email)
 
-Apply **`docs/migrations/001_p0_security.sql`** in the Supabase SQL editor for production.
+Apply migrations in order in the Supabase SQL editor for production:
+
+1. **`docs/migrations/001_p0_security.sql`**
+2. **`docs/migrations/002_email_events.sql`**
 
 ## Identity
 
@@ -28,9 +31,15 @@ RLS: no client policies.
 ### waitlist
 Insert allowed for anon; no client select.
 
+### email_events
+`id`, `email`, `type`, `status`, `provider`, `provider_message_id`, `error`, `created_at`, `sent_at`  
+RLS: enabled, **no client policies** (service role only).  
+Types: `waitlist_welcome` | `notify_me` | `signup_verification` | `password_reset` | `purchase_receipt` | `other`.  
+Statuses: `pending` | `sent` | `failed` | `skipped`.
+
 ## Clients
 
 | File | Role |
 |------|------|
 | `src/lib/supabase/server.ts` | Session (cookie) |
-| `src/lib/supabase/admin.ts` | Service role — webhooks/verify |
+| `src/lib/supabase/admin.ts` | Service role — webhooks/verify/email_events |
