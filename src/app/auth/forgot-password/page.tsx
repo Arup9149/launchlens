@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
+import { getAuthCallbackUrl } from "@/lib/supabase/auth-redirect"
 import Link from "next/link"
 import { Logo } from "@/components/logo"
 
@@ -48,13 +49,12 @@ export default function ForgotPasswordPage() {
     setError("")
 
     const supabase = createClient()
-    const origin =
-      typeof window !== "undefined" ? window.location.origin : ""
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(
       email.trim(),
       {
-        redirectTo: origin ? `${origin}/auth/login` : undefined,
+        // Exchange code on LaunchLens, then continue to sign-in
+        redirectTo: getAuthCallbackUrl("/auth/login"),
       }
     )
 
@@ -91,7 +91,7 @@ export default function ForgotPasswordPage() {
             Reset your password
           </h1>
           <p className="text-[14px] text-zinc-500 mb-8 text-center sm:text-left leading-relaxed">
-            We&apos;ll help you get back into LaunchLens.
+            We'll help you get back into LaunchLens.
           </p>
 
           {sent ? (
@@ -100,7 +100,7 @@ export default function ForgotPasswordPage() {
                 className="text-[14px] text-emerald-400 leading-relaxed"
                 role="status"
               >
-                If an account exists for that email, you&apos;ll receive a reset
+                If an account exists for that email, you'll receive a reset
                 link shortly. Check your inbox and spam folder.
               </p>
               <Link
