@@ -1,6 +1,5 @@
 import Link from "next/link"
 import { Logo } from "@/components/logo"
-import { QrHandoffButton } from "@/components/handoff/qr-button"
 
 export default function AppLayout({
   children,
@@ -41,7 +40,6 @@ export default function AppLayout({
             >
               Home
             </Link>
-            <QrHandoffButton />
             <form action="/auth/signout" method="post" className="inline-flex">
               <button
                 type="submit"
