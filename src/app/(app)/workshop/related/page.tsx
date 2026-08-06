@@ -17,6 +17,7 @@ function RelatedIdeasPageInner() {
   const [idea, setIdea] = useState("")
   const [ideas, setIdeas] = useState<RelatedIdea[]>([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const q = searchParams.get("idea")
@@ -27,6 +28,7 @@ function RelatedIdeasPageInner() {
     if (!idea.trim() || loading) return
     setLoading(true)
     setIdeas([])
+    setError(null)
 
     try {
       const res = await fetch("/api/related", {
@@ -36,11 +38,33 @@ function RelatedIdeasPageInner() {
       })
 
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || "Generation failed")
+      if (!res.ok) {
+        throw new Error(
+          data.error ||
+            "We couldn't generate related ideas right now. Please try again."
+        )
+      }
 
-      setIdeas(data.ideas || [])
+      const list = Array.isArray(data.ideas) ? data.ideas : []
+      if (list.length === 0) {
+        setError(
+          "We couldn't generate related ideas right now. Please try again."
+        )
+      } else {
+        setIdeas(list)
+      }
     } catch (err: any) {
-      alert(err.message || "Something went wrong")
+      const msg = String(err?.message || "")
+      if (/JSON|position \d+|Unexpected token|Expected property/i.test(msg)) {
+        setError(
+          "We couldn't generate related ideas right now. Please try again."
+        )
+      } else {
+        setError(
+          msg ||
+            "We couldn't generate related ideas right now. Please try again."
+        )
+      }
     } finally {
       setLoading(false)
     }
@@ -89,6 +113,12 @@ function RelatedIdeasPageInner() {
           )}
         </button>
       </div>
+
+      {error && (
+        <div className="mb-6 rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-[13px] text-red-200">
+          {error}
+        </div>
+      )}
 
       {ideas.length > 0 && (
         <div className="space-y-4">
