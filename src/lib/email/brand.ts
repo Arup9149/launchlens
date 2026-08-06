@@ -5,7 +5,7 @@
 
 export const EMAIL_BRAND = {
   productName: "LaunchLens",
-  tagline: "Know before you build.",
+  tagline: "See Opportunities. Build What Matters.",
   /** Displayed in HTML mark; real From is always from env via getEmailConfig(). */
   teamLabel: "Team LaunchLens",
   colors: {
@@ -17,10 +17,10 @@ export const EMAIL_BRAND = {
     textStrong: "#fafafa",
     textMuted: "#a1a1aa",
     textFaint: "#71717a",
-    accent: "#c4b5fd",
-    markFrom: "#a78bfa",
-    markMid: "#7c3aed",
-    markTo: "#a21caf",
+    accent: "#60a5fa",
+    markFrom: "#3b82f6",
+    markMid: "#2563eb",
+    markTo: "#1d4ed8",
   },
   fontStack:
     "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif",
@@ -69,7 +69,7 @@ export function renderEmailShell(content: EmailShellContent): string {
                 <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:0 0 8px rgba(255,255,255,0.8);vertical-align:middle;"></span>
               </div>
               <div style="font-family:${EMAIL_BRAND.fontStack};font-size:18px;font-weight:500;letter-spacing:-0.02em;color:#ffffff;">
-                Launch<span style="color:${c.accent};">Lens</span>
+                Launch<span style="color:#3b82f6;">Lens</span>
               </div>
               <div style="font-family:${EMAIL_BRAND.fontStack};font-size:12px;letter-spacing:0.04em;color:${c.textMuted};margin-top:6px;">
                 ${escapeEmailHtml(EMAIL_BRAND.tagline)}
