@@ -62,7 +62,7 @@ export function generateFounderPlaybookPdf(ctx: FounderPdfContext = {}): Blob {
   doc.setTextColor(80)
   doc.text(`for ${name}`, PAGE_W / 2, 95, { align: "center" })
   doc.setFontSize(11)
-  doc.text("Know before you build.", PAGE_W / 2, 115, { align: "center" })
+  doc.text("See Opportunities. Build What Matters.", PAGE_W / 2, 115, { align: "center" })
 
   doc.addPage()
   let y = MARGIN
