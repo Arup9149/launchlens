@@ -17,7 +17,7 @@
 
 ## 1. Brand & founder experience
 
-- [x] Logo tagline **Know before you build.** (hidden &lt;360px to avoid clip)
+- [x] Logo tagline **See Opportunities. Build What Matters.** (hidden <360px to avoid clip)
 - [x] Waitlist premium success / duplicate states
 - [x] Validate founder-focused loading copy
 - [x] Auth UI without provider names
