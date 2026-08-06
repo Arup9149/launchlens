@@ -119,129 +119,104 @@ export default function Home() {
             Open Workshop
           </Link>
         </div>
-        <p className="text-[12px] text-zinc-600 mt-5">
-          Secure checkout · Private local Brain option · Workshop included
-        </p>
       </section>
 
-      <section className="max-w-5xl mx-auto px-6 py-14">
-        <p className="text-[12px] uppercase tracking-[0.2em] text-zinc-500 mb-8 text-center">
-          The path
-        </p>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <section className="max-w-5xl mx-auto px-6 py-16">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             {
-              step: "01",
               title: "Validate",
-              desc: "Score, verdict, demand, competition, risks, and next steps from the Brain.",
+              body: "Go / Pivot / Kill with market and competitor signals.",
             },
             {
-              step: "02",
               title: "Polish",
-              desc: "Sharpen problem, ICP, wedge, and pricing with Brain-assisted refinement.",
+              body: "Tighten positioning, offer, and messaging in Workshop.",
             },
             {
-              step: "03",
               title: "Expand",
-              desc: "Generate adjacent opportunities with clearer scope and upside.",
+              body: "Adjacent opportunities without retyping the idea.",
             },
             {
-              step: "04",
               title: "Architect",
-              desc: "Modules, tech stack, system flow, risks, metrics, and a 30-day plan.",
+              body: "MVP blueprint and build sequence for indie founders.",
             },
           ].map((item) => (
-            <div key={item.step} className="glass rounded-2xl p-5">
-              <p className="text-[12px] text-violet-400 mb-2">{item.step}</p>
+            <div key={item.title} className="glass rounded-2xl p-5 text-left">
               <h3 className="text-[15px] font-medium mb-2">{item.title}</h3>
-              <p className="text-[13px] text-zinc-500 leading-relaxed">
-                {item.desc}
-              </p>
+              <p className="text-[13px] text-zinc-500 leading-relaxed">{item.body}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="max-w-5xl mx-auto px-6 py-14">
-        <p className="text-[12px] uppercase tracking-[0.2em] text-zinc-500 mb-8 text-center">
-          Why founders use it
-        </p>
+      <section className="max-w-5xl mx-auto px-6 py-16">
+        <h2 className="text-2xl font-medium tracking-tight text-center mb-10">
+          Built for founders who ship
+        </h2>
         <div className="grid sm:grid-cols-2 gap-4">
           {[
             {
               title: "Builder outputs, not only a score",
-              desc: "Modules, recommended stack, system flow, and a 30-day execution plan — so you know what to build next.",
+              body: "Reports you can act on — validation, polish, expand, architecture.",
             },
             {
               title: "Simple checkout",
-              desc: "Pay once for Early Bird access. No subscription required to start validating.",
+              body: "Early Bird pricing with regional currency display.",
             },
             {
               title: "Private local Brain option",
-              desc: "Run analysis through Ollama on your machine when you want zero per-query API cost and private processing.",
+              body: "Run analysis with your own Ollama setup when you want control.",
             },
             {
               title: "Idea handoff without retyping",
-              desc: "From the report, jump into Polish, Related Ideas, or Architecture with the idea already loaded.",
+              body: "Validated ideas flow into Workshop tools automatically.",
             },
           ].map((f) => (
             <div key={f.title} className="glass rounded-2xl p-6">
               <h3 className="text-[15px] font-medium mb-2">{f.title}</h3>
-              <p className="text-[13px] text-zinc-500 leading-relaxed">
-                {f.desc}
-              </p>
+              <p className="text-[13px] text-zinc-500 leading-relaxed">{f.body}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Pricing cards */}
-      <section className="max-w-5xl mx-auto px-6 py-14">
-        <p className="text-[12px] uppercase tracking-[0.2em] text-zinc-500 mb-8 text-center">
+      <section className="max-w-5xl mx-auto px-6 py-16">
+        <h2 className="text-2xl font-medium tracking-tight text-center mb-3">
           Pricing
+        </h2>
+        <p className="text-[14px] text-zinc-500 text-center mb-10">
+          Start with Early Bird. Upgrade when you are ready to ship harder.
         </p>
         <div className="grid md:grid-cols-3 gap-4">
-          {/* Early Bird */}
-          <div className="glass-strong rounded-2xl p-6 border border-violet-500/30">
-            <p className="text-[12px] text-violet-400 mb-2">Early Bird</p>
-            <div className="flex items-baseline gap-2 mb-1">
-              <span className="text-[13px] text-zinc-500 line-through">
-                {price.list}
-              </span>
-              <span className="text-3xl font-medium">{price.label}</span>
-            </div>
-            <p className="text-[12px] text-emerald-400 mb-4">First 50 founders</p>
+          <div className="glass rounded-2xl p-6 border border-violet-500/30">
+            <p className="text-[12px] text-violet-300 mb-2">Early Bird</p>
+            <p className="text-3xl font-medium mb-1">{price.label}</p>
+            <p className="text-[12px] text-zinc-500 mb-4">First 50 founders</p>
             <ul className="text-[13px] text-zinc-400 space-y-2 mb-6">
               <li>• 2 full validations</li>
-              <li>• Full Workshop access</li>
-              <li>• Starter setup guide (stack-aware)</li>
-              <li>• Do’s & Don’ts completion page</li>
-              <li>• Report → blueprint path</li>
+              <li>• Starter guides</li>
+              <li>• Workshop access</li>
+              <li>• Early product influence</li>
             </ul>
             <Link
               href="/validate"
-              className="block text-center bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-400 hover:to-violet-500 text-[13px] font-medium px-5 py-2.5 rounded-full text-white transition"
+              className="block text-center text-[13px] font-medium py-2.5 rounded-full bg-violet-600 hover:bg-violet-500 text-white transition"
             >
-              Start · {price.label}
+              Claim seat
             </Link>
           </div>
-
-          {/* Builder */}
           <div className="glass rounded-2xl p-6">
-            <p className="text-[12px] text-zinc-400 mb-2">Builder Pass</p>
+            <p className="text-[12px] text-zinc-400 mb-2">Builder</p>
             <p className="text-3xl font-medium mb-1">{price.builder}</p>
-            <p className="text-[12px] text-zinc-500 mb-4">Best for iterating</p>
+            <p className="text-[12px] text-zinc-500 mb-4">After Early Bird</p>
             <ul className="text-[13px] text-zinc-400 space-y-2 mb-6">
               <li>• 3 full validations</li>
-              <li>• Everything in Early Bird</li>
-              <li>• Launch setup (copy-paste commands)</li>
-              <li>• 4-page building ethics guide</li>
-              <li>• Stronger coding assistance notes</li>
+              <li>• Workshop tools</li>
+              <li>• Founder Playbook PDF</li>
+              <li>• 20-Day Builder Program</li>
             </ul>
             <p className="text-[12px] text-zinc-600">Opens after Early Bird</p>
           </div>
-
-          {/* Pro */}
           <div className="glass rounded-2xl p-6">
             <p className="text-[12px] text-zinc-400 mb-2">Pro Launch</p>
             <p className="text-3xl font-medium mb-1">{price.pro}</p>
@@ -298,7 +273,7 @@ export default function Home() {
 
       <footer className="border-t border-white/[0.06] py-10 text-center">
         <p className="text-[13px] text-zinc-600">
-          LaunchLens · Know before you build
+          LaunchLens · See Opportunities. Build What Matters.
         </p>
       </footer>
     </main>
