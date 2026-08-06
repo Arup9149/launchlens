@@ -44,7 +44,7 @@ export function Logo({
         aria-hidden
       >
         <Image
-          src="/logo-icon.png"
+          src="/logo-icon.svg"
           alt=""
           width={imgPx}
           height={imgPx}
