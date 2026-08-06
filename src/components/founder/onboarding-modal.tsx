@@ -63,7 +63,7 @@ export function OnboardingModal() {
           🎉 Welcome to LaunchLens
         </h2>
         <p className="text-[14px] text-zinc-500 text-center mb-6">
-          Know before you build.
+          See Opportunities. Build What Matters.
         </p>
 
         <p className="text-[15px] text-zinc-300 leading-relaxed mb-5 text-center sm:text-left">
