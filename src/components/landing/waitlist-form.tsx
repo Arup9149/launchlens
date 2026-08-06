@@ -70,7 +70,7 @@ export function WaitlistForm() {
             : "Check your inbox for a short welcome note. We'll notify you before seats open and share founder pricing first."}
         </p>
         <p className="text-[12px] text-zinc-600 mt-3">
-          Know before you build.
+          See Opportunities. Build What Matters.
         </p>
       </div>
     )
