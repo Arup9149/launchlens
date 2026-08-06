@@ -50,6 +50,7 @@ export function Logo({
           height={imgPx}
           className="w-full h-full object-contain"
           priority
+          unoptimized
         />
       </span>
 
