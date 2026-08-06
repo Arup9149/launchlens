@@ -16,7 +16,7 @@ const siteUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "LaunchLens — Know before you build",
+    default: "LaunchLens — See Opportunities. Build What Matters.",
     template: "%s · LaunchLens",
   },
   description:
@@ -36,15 +36,33 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: siteUrl,
     siteName: "LaunchLens",
-    title: "LaunchLens — Know before you build",
+    title: "LaunchLens — See Opportunities. Build What Matters.",
     description:
       "Validate → Polish → Expand → Architect. AI-powered founder workspace for early-stage builders.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "LaunchLens — See Opportunities. Build What Matters.",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "LaunchLens — Know before you build",
+    title: "LaunchLens — See Opportunities. Build What Matters.",
     description:
       "Validate startup ideas with AI, then polish, expand, and architect your MVP.",
+    images: ["/og-image.png"],
+  },
+  icons: {
+    icon: [
+      { url: "/icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-48.png", sizes: "48x48", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/icon-180.png", sizes: "180x180", type: "image/png" }],
   },
   robots: {
     index: true,
