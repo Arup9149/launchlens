@@ -4,6 +4,8 @@
  * Ollama is local-dev only — never contacted as a fallback after OpenRouter.
  */
 
+import { parseAiJson } from "./json"
+
 export type BrainEngine = "openrouter" | "ollama"
 
 export type BrainSelection = {
@@ -155,12 +157,13 @@ export async function callOpenRouterJson(
     body: JSON.stringify({
       model,
       temperature: opts?.temperature ?? 0.4,
+      response_format: { type: "json_object" },
       messages: [
         {
           role: "system",
           content:
             opts?.system ||
-            "You return only valid JSON. No markdown fences. No extra commentary.",
+            "You return only valid JSON objects. No markdown fences. No commentary before or after the JSON.",
         },
         { role: "user", content: prompt },
       ],
@@ -240,19 +243,7 @@ export async function callOllamaJson(
   }
 }
 
-export function parseModelJson(raw: string): unknown {
-  const cleaned = raw
-    .replace(/```json/gi, "")
-    .replace(/```/g, "")
-    .trim()
-  try {
-    return JSON.parse(cleaned)
-  } catch {
-    const match = cleaned.match(/\{[\s\S]*\}/)
-    if (match) return JSON.parse(match[0])
-    throw new Error("Could not parse model JSON")
-  }
-}
+export { parseAiJson as parseModelJson, brainUserError, isBrainJsonError, BrainJsonError } from "./json"
 
 /**
  * Run a JSON brain prompt with correct provider selection.
@@ -270,25 +261,44 @@ export async function runBrainJson(
 ): Promise<{ data: unknown; engine: BrainEngine }> {
   const selection = selectBrainEngine()
   logBrainStart(selection, route)
+  const t0 = Date.now()
 
   try {
     if (selection.engine === "openrouter") {
+      const tAi = Date.now()
       const content = await callOpenRouterJson(prompt, {
         system: opts?.system,
         temperature: opts?.temperature,
       })
-      const data = parseModelJson(String(content))
-      logBrainSuccess(selection, route)
+      const aiMs = Date.now() - tAi
+      const tParse = Date.now()
+      const data = parseAiJson(String(content))
+      const parseMs = Date.now() - tParse
+      logBrainSuccess(selection, route, {
+        aiMs,
+        parseMs,
+        totalMs: Date.now() - t0,
+        promptChars: prompt.length,
+      })
       return { data, engine: "openrouter" }
     }
 
+    const tAi = Date.now()
     const raw = await callOllamaJson(prompt, {
       temperature: opts?.temperature,
       numPredict: opts?.ollamaNumPredict,
       timeoutMs: opts?.ollamaTimeoutMs,
     })
-    const data = parseModelJson(raw)
-    logBrainSuccess(selection, route)
+    const aiMs = Date.now() - tAi
+    const tParse = Date.now()
+    const data = parseAiJson(raw)
+    const parseMs = Date.now() - tParse
+    logBrainSuccess(selection, route, {
+      aiMs,
+      parseMs,
+      totalMs: Date.now() - t0,
+      promptChars: prompt.length,
+    })
     return { data, engine: "ollama" }
   } catch (err) {
     logBrainError(selection, route, err)
