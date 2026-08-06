@@ -1,15 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
-  <!-- Magnifying glass -->
-  <circle cx="52" cy="52" r="34" stroke="#0B1B33" stroke-width="7" fill="none"/>
-  <line x1="76" y1="76" x2="102" y2="102" stroke="#0B1B33" stroke-width="9" stroke-linecap="round"/>
-  <!-- Chart bars -->
-  <rect x="34" y="62" width="10" height="16" rx="1.5" fill="#60A5FA"/>
-  <rect x="47" y="50" width="10" height="28" rx="1.5" fill="#3B82F6"/>
-  <rect x="60" y="38" width="10" height="40" rx="1.5" fill="#2563EB"/>
-  <!-- Trend line -->
-  <polyline points="30,70 42,58 55,48 72,30" stroke="#0B1B33" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <circle cx="30" cy="70" r="3.5" fill="#0B1B33"/>
-  <circle cx="42" cy="58" r="3.5" fill="#0B1B33"/>
-  <circle cx="55" cy="48" r="3.5" fill="#0B1B33"/>
-  <circle cx="72" cy="30" r="3.5" fill="#0B1B33"/>
+  <!-- Magnifying glass rim -->
+  <circle cx="50" cy="50" r="32" stroke="#0B1B33" stroke-width="6.5" fill="none"/>
+  <!-- Handle -->
+  <line x1="73" y1="73" x2="100" y2="100" stroke="#0B1B33" stroke-width="8.5" stroke-linecap="round"/>
+  <!-- Chart bars (light to deep blue) -->
+  <rect x="32" y="58" width="9" height="16" rx="1.5" fill="#93C5FD"/>
+  <rect x="44" y="46" width="9" height="28" rx="1.5" fill="#3B82F6"/>
+  <rect x="56" y="34" width="9" height="40" rx="1.5" fill="#1D4ED8"/>
+  <!-- Rising trend line with dots -->
+  <polyline points="28,66 40,54 53,44 70,26" stroke="#0B1B33" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="28" cy="66" r="3.2" fill="#0B1B33"/>
+  <circle cx="40" cy="54" r="3.2" fill="#0B1B33"/>
+  <circle cx="53" cy="44" r="3.2" fill="#0B1B33"/>
+  <circle cx="70" cy="26" r="3.2" fill="#0B1B33"/>
 </svg>
