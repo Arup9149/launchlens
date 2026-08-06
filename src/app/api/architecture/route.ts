@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { runBrainJson } from "@/lib/brain/provider"
+import { runBrainJson, brainUserError } from "@/lib/brain/provider"
 
 export async function POST(request: Request) {
   try {
@@ -115,13 +115,7 @@ Rules:
       )
     }
     return NextResponse.json(
-      {
-        error:
-          err?.message?.includes("OPENROUTER") ||
-          err?.message?.includes("Brain unavailable")
-            ? "Brain is temporarily unavailable. Please try again shortly."
-            : err?.message || "Architecture generation failed",
-      },
+      { error: brainUserError(err, "Architecture generation failed. Please try again.") },
       { status: 500 }
     )
   }

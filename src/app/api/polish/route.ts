@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { runBrainJson } from "@/lib/brain/provider"
+import { runBrainJson, brainUserError } from "@/lib/brain/provider"
 
 function clamp(n: any, fb = 50) {
   const v = Number(n)
@@ -113,13 +113,7 @@ export async function POST(request: Request) {
       )
     }
     return NextResponse.json(
-      {
-        error:
-          err?.message?.includes("OPENROUTER") ||
-          err?.message?.includes("Brain unavailable")
-            ? "Brain is temporarily unavailable. Please try again shortly."
-            : err?.message || "Polish failed",
-      },
+      { error: brainUserError(err, "Polish failed. Please try again.") },
       { status: 500 }
     )
   }
