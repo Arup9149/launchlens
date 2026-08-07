@@ -2,6 +2,12 @@ import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { useCreditForUser } from "@/lib/credits/server"
 import { ensureFounderCreditsRow } from "@/lib/credits/ensure-founder"
+import {
+  rateLimit,
+  rateLimitHeaders,
+  RATE_LIMITS,
+  safeLog,
+} from "@/lib/security"
 
 /**
  * Credits are scoped to auth.uid().
@@ -17,24 +23,40 @@ export async function GET() {
     } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: "Authentication required" }, { status: 401 })
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      )
+    }
+
+    const rl = rateLimit(
+      `api:credits:get:${user.id}`,
+      RATE_LIMITS.api.limit,
+      RATE_LIMITS.api.windowMs
+    )
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests" },
+        { status: 429, headers: rateLimitHeaders(rl) }
+      )
     }
 
     const row = await ensureFounderCreditsRow(supabase, user)
 
-    return NextResponse.json({
-      email: row.email,
-      credits: row.credits,
-      plan: row.plan,
-      userId: user.id,
-      bootstrapped: row.bootstrapped,
-    })
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Failed"
-    console.error(
-      JSON.stringify({ level: "error", msg: "credits.get_failed", error: message })
+    return NextResponse.json(
+      {
+        credits: row.credits,
+        plan: row.plan,
+        bootstrapped: row.bootstrapped,
+      },
+      { headers: rateLimitHeaders(rl) }
     )
-    return NextResponse.json({ error: message }, { status: 500 })
+  } catch {
+    safeLog("error", "credits.get_failed")
+    return NextResponse.json(
+      { error: "Failed to load credits" },
+      { status: 500 }
+    )
   }
 }
 
@@ -46,7 +68,22 @@ export async function POST(request: Request) {
     } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: "Authentication required" }, { status: 401 })
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      )
+    }
+
+    const rl = rateLimit(
+      `api:credits:post:${user.id}`,
+      RATE_LIMITS.api.limit,
+      RATE_LIMITS.api.windowMs
+    )
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests" },
+        { status: 429, headers: rateLimitHeaders(rl) }
+      )
     }
 
     const body = await request.json().catch(() => ({}))
@@ -66,24 +103,32 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid action" }, { status: 400 })
     }
 
-    // Ensure row exists before consume (new founder with 3 can use immediately)
     await ensureFounderCreditsRow(supabase, user)
 
     try {
       const result = await useCreditForUser(supabase, user.id)
-      return NextResponse.json({ credits: result.credits, plan: result.plan })
+      return NextResponse.json(
+        { credits: result.credits, plan: result.plan },
+        { headers: rateLimitHeaders(rl) }
+      )
     } catch (err: unknown) {
       const e = err as { status?: number; message?: string; credits?: number }
       if (e.status === 402) {
         return NextResponse.json(
-          { error: e.message || "No validations remaining", credits: e.credits ?? 0 },
+          {
+            error: "No validations remaining",
+            credits: e.credits ?? 0,
+          },
           { status: 402 }
         )
       }
       throw err
     }
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Failed"
-    return NextResponse.json({ error: message }, { status: 500 })
+  } catch {
+    safeLog("error", "credits.post_failed")
+    return NextResponse.json(
+      { error: "Failed to update credits" },
+      { status: 500 }
+    )
   }
 }
