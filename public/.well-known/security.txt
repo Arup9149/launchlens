@@ -1,0 +1,5 @@
+Contact: mailto:shortlistready@gmail.com
+Preferred-Languages: en
+Canonical: https://launchlens.ai/.well-known/security.txt
+Policy: https://launchlens.ai/acceptable-use
+Expires: 2027-08-07T00:00:00.000Z
