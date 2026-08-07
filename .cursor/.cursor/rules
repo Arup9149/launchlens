@@ -1,0 +1,10 @@
+- Never guess project structure.
+- Inspect files before editing.
+- Preserve architecture unless explicitly approved.
+- Prefer complete implementations over placeholders.
+- Compile after every change.
+- Fix root causes instead of symptoms.
+- Keep changes minimal and production-ready.
+- Never expose secrets.
+- Never commit .env files.
+- Verify before declaring success.
