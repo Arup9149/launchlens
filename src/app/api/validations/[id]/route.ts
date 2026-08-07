@@ -24,7 +24,7 @@ export async function GET(
       .maybeSingle()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: "Could not load validation" }, { status: 500 })
     }
     if (!data) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
